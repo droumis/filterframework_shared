@@ -5,6 +5,13 @@ master <-- develop <-- '<user>-dev'
 * new members please create a new branch <user>-dev (e.g. 'demetris-dev') from develop and merge working functions/scripts from their branch to develop
 * master branch will be reserved for very polished, documented code that would be shareable with non-franklab members.
 
+
+**General Repo Rules**
+1. **DO NOT** put anything into the develop branch with initials appended. 
+* The develop branch is for basic, lab-shareable code
+* Leave the kk_sj_sk_Kodez_useme_old_v4.m files in your '<user>-dev' branch
+
+
 #**Codebase map:**# 
 
 1. **DFAnalysis:** analysis-related functions (‘dfa_...’, other)
