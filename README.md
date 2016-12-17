@@ -7,11 +7,11 @@ master <-- develop <-- '<user>-dev'
 
 #**Codebase map:**# 
 
-**DFAnalysis:** analysis-related functions (‘dfa_...’)
+1. **DFAnalysis:** analysis-related functions (‘dfa_...’)
 dfa_calcriptrigspectrogram
 
-**DFScripts:** analysis-related scripts (‘dfs_...’)
+2. **DFScripts:** analysis-related scripts (‘dfs_...’)
 dfs_riptriggeredspectrogram
-**
-DFFunctions:** filter framework processing-related functions (‘get...’, ‘set…’, other)
+
+3. **DFFunctions:** filter framework processing-related functions (‘get...’, ‘set…’, other)
 eegprocess, geteegtimes, getvalideegtimes
