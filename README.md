@@ -8,10 +8,13 @@ master <-- develop <-- '<user>-dev'
 #**Codebase map:**# 
 
 1. **DFAnalysis:** analysis-related functions (‘dfa_...’)
+
 * Example: dfa_calcriptrigspectrogram
 
 2. **DFScripts:** analysis-related scripts (‘dfs_...’)
+
 * Example: dfs_riptriggeredspectrogram
 
 3. **DFFunctions:** filter framework processing-related functions (‘get...’, ‘set…’, other)
+
 * Example: eegprocess, geteegtimes, getvalideegtimes
