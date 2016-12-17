@@ -1,4 +1,4 @@
-**#-------- flab analysis repo README----------------**
+**-------- flab analysis repo README----------------**
 # **Branch management:** #
 master <-- develop <-- '<user>-dev'
 
@@ -18,3 +18,14 @@ master <-- develop <-- '<user>-dev'
 3. **DFFunctions:** filter framework processing-related functions (‘get...’, ‘set…’, other)
 
 * Examples: get2dstate, getconstimes, eegprocess, geteegtimes, getvalideegtimes
+
+
+
+**General Info:**
+
+1. Where applicable, data is stored as nested matlab cell arrays.
+* {animal}{day}{epoch}{tetrode}{cell}
+
+
+
+
