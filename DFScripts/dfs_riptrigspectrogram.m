@@ -5,10 +5,10 @@ consensus_numtets = 1;   % minimum # of tets for consensus event detection
         maxvelocity = 4; 
 
 
-eventcons = 'dca3ripplescons';
+eventcons = 'ca1rippleskons';
 
 % Animal Selection
-    animals = {'JZ1'};
+    animals = {'D13'};
     
     % Day Filter
     dayfilter = 1; %6:16; %Fabio days 6-13 for S1 acquisition, 14-21 for switch
@@ -22,7 +22,7 @@ tetfilter = '(isequal($area,''ca1''))';
 
 timefilter{1} = {'get2dstate','($velocity<4)'};
 % timefilter{2} = {'kk_getriptimes','($nripples>=1)',[],'tetfilter',tetfilter,'minthresh',5};
-timefilter{2} = {'kk_getconstimes', '($cons == 1)',eventcons,1,...
+timefilter{2} = {'getconstimes', '($cons == 1)',eventcons,1,...
                    'consensus_numtets',consensus_numtets,...
                    'minthresh',minthresh,'exclusion_dur',exclusion_dur,'minvelocity',minvelocity,'maxvelocity',maxvelocity};
                
