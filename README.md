@@ -1,4 +1,7 @@
 **-------- flab analysis repo README----------------**
+
+*See repo Wiki for analysis-specific documentation*
+
 # **Branch management:** #
 master <-- develop <-- '<user>-dev'
 
