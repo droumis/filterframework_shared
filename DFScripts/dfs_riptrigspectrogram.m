@@ -1,20 +1,24 @@
+
+%---------------- ripple triggered spectrogram parameters--------------------------
+% eventcons = 'ca1rippleskons';
+eventtype = 'rippleskons';
+eventarea = 'ca1';
+
 consensus_numtets = 1;   % minimum # of tets for consensus event detection
-        minthresh = 2;          % how big your ripples are
-        exclusion_dur = 0.5;             % seconds within which consecutive events are eliminated / ignored   
-        minvelocity = 0;
-        maxvelocity = 4; 
+minthresh = 2;        % STD. how big your ripples are
+exclusion_dur = 0.5;  % seconds within which consecutive events are eliminated / ignored   
+minvelocity = 0;
+maxvelocity = 4; 
 
-
-eventcons = 'ca1rippleskons';
-
+% ---------------- Data Filters ---------------------------------------------------
 % Animal Selection
-    animals = {'D13'};
+animals = {'D13'};
     
-    % Day Filter
-    dayfilter = 1; %6:16; %Fabio days 6-13 for S1 acquisition, 14-21 for switch
-    
-    % Epoch Filter
-    epochfilter =    '(isequal($type, ''run''))'; %'isequal($type, ''run'') && (isequal($environment, ''MultipleW''))'; %%'(isequal($type, ''sleep''))'; %%%&& isequal($descript, ''post-allruns''))';%   %%% %'isequal($type, ''run'') && isequal($environment, ''WTrackA'') && (($exposure>=1) && ($exposure<=10))';  %
+% Day Filter
+dayfilter = 1; %6:16; %Fabio days 6-13 for S1 acquisition, 14-21 for switch
+   
+% Epoch Filter
+epochfilter =    '(isequal($type, ''run'')) && (isequal($environment, ''wtrack''))'; %'isequal($type, ''run'') && (isequal($environment, ''MultipleW''))'; %%'(isequal($type, ''sleep''))'; %%%&& isequal($descript, ''post-allruns''))';%   %%% %'isequal($type, ''run'') && isequal($environment, ''WTrackA'') && (($exposure>=1) && ($exposure<=10))';  %
 
 iterator = 'epocheeganal';
 
@@ -22,13 +26,15 @@ tetfilter = '(isequal($area,''ca1''))';
 
 timefilter{1} = {'get2dstate','($velocity<4)'};
 % timefilter{2} = {'kk_getriptimes','($nripples>=1)',[],'tetfilter',tetfilter,'minthresh',5};
-timefilter{2} = {'getconstimes', '($cons == 1)',eventcons,1,...
+timefilter{2} = {'getconstimes', '($cons == 1)',[eventarea,eventtype],1,...
                    'consensus_numtets',consensus_numtets,...
                    'minthresh',minthresh,'exclusion_dur',exclusion_dur,'minvelocity',minvelocity,'maxvelocity',maxvelocity};
-               
+
+%----------F = createfilter('animal', animals, 'days', dayfilter,'epochs', epochfilter, 'excludetime', timefilter, 'eegtetrodes',tetfilter,'iterator', iterator);--------
 F = createfilter('animal', animals, 'days', dayfilter,'epochs', epochfilter, 'excludetime', timefilter, 'eegtetrodes',tetfilter,'iterator', iterator);
 
-F = setfilterfunction(F, 'dfa_calcriptrigspectrogram', {'eeg',eventcons},'eventtype','ripplescons'); 
+%----------f = setfilteriterator(f, funcname, loadvariables, options)--------
+F = setfilterfunction(F, 'dfa_calcriptrigspectrogram', {'eeg', [eventarea,eventtype]},'eventtype',eventtype); 
 
 F = runfilter(F);
 

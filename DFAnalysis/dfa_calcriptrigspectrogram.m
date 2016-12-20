@@ -62,10 +62,10 @@ for option = 1:2:length(varargin)-1
 end
 
   
-if strcmp(eventtype,'ripplescons')
-    eventtimes = events{index(1)}{index(2)}{1}.starttime;
-elseif strcmp(eventtype,'ripples')
+if strcmp(eventtype,'ripples')
     eventtimes = events{index(1)}{index(2)}{index(3)}.starttime;
+else % ripplecons, ripplekons, etc
+    eventtimes = events{index(1)}{index(2)}{1}.starttime;
 end
     eventtimes = eventtimes(~isExcluded(eventtimes,excludeperiods));
 
@@ -77,6 +77,7 @@ endtime = (length(e)-1) * (1 / params.Fs);
 clear eeg ripple cellinfo
 
 % Define triggering events as the start of each ripple
+starttime = double(starttime);
 triggers = eventtimes(:,1)-starttime;
 
 %Remove triggering events that are too close to the beginning or end

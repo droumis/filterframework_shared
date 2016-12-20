@@ -22,7 +22,7 @@ master <-- develop <-- '<user>-dev'
 
 * Example: dfs_riptriggeredspectrogram
 
-3. **DFFunctions:** filter framework data processing-related functions (‘get...’, ‘set…’, other)
+3. **DFFunctions:** filter framework data processing-related functions (‘get...’, ‘set…’, Iterators)
 
 * Examples: get2dstate, getconstimes, eegprocess, geteegtimes, getvalideegtimes
 

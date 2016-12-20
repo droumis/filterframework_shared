@@ -49,10 +49,12 @@ for an = 1:length(f)
             for c = 1:size(f(an).eegdata{g}{e},1)
                 index = [f(an).epochs{g}(e,:) f(an).eegdata{g}{e}(c,:)];
                 excludeperiods = f(an).excludetime{g}{e};
-                % load the eeg data for this day epoch
+                % load the data for this day epoch
                 for i = 1:length(f(an).function.loadvariables)
-                    if (iseegvar(f(an).function.loadvariables{i}))
+                    if (iseegvar(f(an).function.loadvariables{i})) %if it's an eeg structure
                         eval([f(an).function.loadvariables{i},' = loadeegstruct(animaldir, animalprefix, f(an).function.loadvariables{i}, index(1), index(2), index(3:end));']);
+                    else %some other data structure
+                        eval([f(an).function.loadvariables{i},' = loaddatastruct(animaldir, animalprefix, f(an).function.loadvariables{i}, index(1));']);
                     end
                 end
             

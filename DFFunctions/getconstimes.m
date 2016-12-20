@@ -268,8 +268,8 @@ for i = 1:size(epochs,1)
         
         
         % print out number of surviving events
-        %disp(sprintf('d %d e %d: %d out of %d original %s events remain',...
-        %    epochs(i,1),epochs(i,2),size(ectimes,1),conscount,eventconsname))
+        disp(sprintf('d %d e %d: %d out of %d original %s events remain',...
+           epochs(i,1),epochs(i,2),size(ectimes,1),conscount,eventconsname))
         
         % convert from list form back to vector form
         cons = list2vec(ectimes,times)';
