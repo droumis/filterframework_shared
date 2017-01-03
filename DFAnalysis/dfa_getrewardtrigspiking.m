@@ -205,9 +205,9 @@ for t=1:size(trigmatrix,1)
     
     % if using outputtimes and pseudo specified, then check if error trial
     %   - if so, institute the known offset (e.g. 0.5 sec)
-    if trigmatrix(t,2)==0 && outputtimes==1
+    if trigmatrix(t,2)==0
         offset = pseudodelay;
-    elseif trigmatrix(t,2)==1 && outputtimes==1
+    elseif trigmatrix(t,2)==1
         offset = 0;
     end
     

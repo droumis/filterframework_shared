@@ -27,7 +27,7 @@ end
 for t=1:size(ripples,1)
         x = timevec(ripples(t,1:(end-1))==1);
         y = ylevel * ones(size(x));
-        line([x ; x],[y ; y + h],'color','b')
+        line([x ; x],[y ; y + h],'color','b','LineWidth',1)
         ylevel = ylevel + h;
 end
 

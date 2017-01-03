@@ -8,15 +8,14 @@ binsize = 0.001; %in sec, for raster
 psthbinsize = 0.1; % in sec, for psth; larger bins for smoother psth
 
 %Define trigger type
-input=0;
-output=1; % if 1, specify delay length as an argument to DFA to create "pseudo" output times for error trials
+input=1;
+output=0; % if 1, specify delay length as an argument to DFA to create "pseudo" output times for error trials
 
 %Include ripples in raster?
 dorip = 1;
 
 %Plotting options
 plotrewarderrorrasters = 1; %Plot spike rasters for reward vs. error trials
-plotbywell = 0; %Plot rasters by well
 plotpsth = 1; %Plot spike histograms
 plotvelocity = 1; %Plot velocity with rasters
 if plotvelocity == 1
@@ -69,7 +68,7 @@ if runscript
     %     ca2f = setfilterfunction(ca2f, 'dfams_getrewardtrigspiking', {'spikes','rewardinfo','ripples','pos','cellinfo','tetinfo'},'window',[5 5],'binsize',0.001,'minthresh',3,'input',1,'prioritize_ripples',0);
     %     ca3f = setfilterfunction(ca3f, 'dfams_getrewardtrigspiking', {'spikes','rewardinfo','ripplescons','pos','cellinfo','tetinfo'},'window',window,'binsize',binsize,'minthresh',3,'maxvelocity',4,'input',1,'doripples',0,'dovelocity',1);
     %     dgf = setfilterfunction(dgf, 'dfams_getrewardtrigspiking', {'spikes','rewardinfo','ripples','pos','cellinfo','tetinfo'},'window',[5 5],'binsize',0.001,'minthresh',3,'input',1,'prioritize_ripples',0);
-    nacf = setfilterfunction(nacf, 'dfams_getrewardtrigspiking', {'spikes','rewardinfo','dca1ripplescons','pos'},'window',window,'binsize',binsize,'psthbinsize',psthbinsize,'minthresh',3,'maxvelocity',4,'input',input,'output',output,'doripples',dorip);
+    nacf = setfilterfunction(nacf, 'dfams_getrewardtrigspiking2', {'spikes','rewardinfo','dca1ripplescons','pos'},'window',window,'binsize',binsize,'psthbinsize',psthbinsize,'minthresh',3,'maxvelocity',4,'input',input,'output',output,'doripples',dorip);
     
     % Run Analysis
     %     ca1f = runfilter(ca1f);
@@ -273,10 +272,10 @@ if plotrewarderrorrasters
                 hold on
                 % plot (no ripples)
                 if dorip==0
-                    msplotraster2(data.times,spikerasters,0,1,'Color',clr,'linewidth',2)
+                    msplotraster2(data.times,spikerasters,0,1,'Color',clr,'LineWidth',1)
                     % plot (with ripples)
                 elseif dorip==1
-                    msplotraster3(data.times,spikerasters,riprasters,0,1,'Color',clr,'linewidth',2)
+                    msplotraster3(data.times,spikerasters,riprasters,0,1,'Color',clr,'LineWidth',1)
                 end
                 % plot well entry and reward lines
                 if input==1
