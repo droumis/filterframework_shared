@@ -1,4 +1,4 @@
-function [out] = dfams_geteventtriggeredspiking(index, excludeperiods, spikes,eventscons, pos, task, sleep, cellinfo,animaldir,animalprefix, varargin)
+function [out] = dfams_geteventtrigspiking(index, excludeperiods, spikes,eventscons, pos, task, sleep, cellinfo,animaldir,animalprefix, varargin)
 
 % MS adapted 2016 from dfakk_geteventtriggeredspiking
 % This function finds spiking triggered to LFP events such as ripples.

@@ -131,7 +131,7 @@ end
          
          % Set Analysis Function
          % ca1f = setfilterfunction(ca1f, 'dfakk_geteventtriggeredspiking', {'spikes',eventconsname,'pos','task','sleep','cellinfo'},animaldir,animalprefix,'TF',TF,'window',window,'binsize',binsize,'minthresh',minthresh,'maxvelocity',maxvelocity,'minvelocity', minvelocity,'consensus_numtets',consensus_numtets,'welldist',welldist);
-         nacf = setfilterfunction(nacf, 'dfams_geteventtriggeredspiking', {'spikes',eventconsname,'pos','task','sleep','cellinfo'},animaldir,animalprefix,'TF',TF,'window',window,'binsize',binsize,'frbinsize',frbinsize,'minthresh',minthresh,'maxvelocity',maxvelocity,'minvelocity', minvelocity,'consensus_numtets',consensus_numtets,'welldist',welldist);
+         nacf = setfilterfunction(nacf, 'dfams_geteventtrigspiking', {'spikes',eventconsname,'pos','task','sleep','cellinfo'},animaldir,animalprefix,'TF',TF,'window',window,'binsize',binsize,'frbinsize',frbinsize,'minthresh',minthresh,'maxvelocity',maxvelocity,'minvelocity', minvelocity,'consensus_numtets',consensus_numtets,'welldist',welldist);
          
          % Run Analysis
          % ca1f = runfilter(ca1f);
