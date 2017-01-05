@@ -265,7 +265,7 @@ out.frtime = frtime;
 out.psth = psth;
 out.frhist = frhist;
 out.instantFR = instantFR;
-out.nospikes = length(spiketimes);
+out.nospikes = length(spiketimes);      % number of spikes in whole epoch
 out.noevents = length(eventtimes);      % this is the number of events this epoch (kk_get<event>times should
                                        % exclude events that come too soon after first event via 'exclusion'
                                        % option)

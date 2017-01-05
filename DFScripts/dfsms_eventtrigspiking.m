@@ -9,7 +9,7 @@ epochtype = 'run';
 
 runscript = 1; 
 usedayfilter = 1;
-dayfilter = [18 19];
+dayfilter = [14 16];
 postprocessing = 1;             
 calcsig = 1;
 
@@ -451,8 +451,8 @@ for c = 1:length(A)
             %         axis tight
         end
         
-        titlestring=sprintf('%s %s %d %d %d (%s,%d)',...
-            animal{1}(1:3),region,A(c).dtc,'ripple spikes',data.nospikes);
+        titlestring=sprintf('%s %s %d %d %d (%s, %d)',...
+            animal{1}(1:3),region,A(c).dtc,'riptrig-spikes', sum(full(data.psthsum)));
         
         [~,title_handle] = suplabel([titlestring],'t');
         set(title_handle,'Fontsize',18,'FontWeight','normal')
