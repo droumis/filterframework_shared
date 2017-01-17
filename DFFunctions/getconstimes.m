@@ -33,6 +33,7 @@ exclusion_nevents = 0;    % number of tetrodes that must have ripple for exclusi
 exclusion2_eventconsname = '';
 minvelocity = 0;
 coherence_flag = 0;
+% convert_to_seconds = 0; %DR added because trodes eeg timestamps had been saved in # samples
 
 optioninds = [];
 for aa = 1:length(varargin)
@@ -130,7 +131,9 @@ for i = 1:size(epochs,1)
         
         % choose your output times vector to be the same as the eegtimesvec
         % of the first participating tetrode
-        times = ec.timerange(1):1/ec.samprate:ec.timerange(end);
+%         times = ec.timerange(1):1/ec.samprate:ec.timerange(end);
+        times = ec.eegtimesvec_ref;
+        
         
         % Filter for events of threshold size
         evalid = (ec.maxthresh > minthresh);

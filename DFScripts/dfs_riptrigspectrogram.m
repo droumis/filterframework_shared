@@ -12,17 +12,17 @@ maxvelocity = 4;
 
 % ---------------- Data Filters ---------------------------------------------------
 % Animal Selection
-animals = {'D13'};
+animals = {'JZ1'};
     
 % Day Filter
-dayfilter = 1; %6:16; %Fabio days 6-13 for S1 acquisition, 14-21 for switch
+dayfilter = 2;%:7; %6:16; %Fabio days 6-13 for S1 acquisition, 14-21 for switch
    
 % Epoch Filter
 epochfilter =    '(isequal($type, ''run'')) && (isequal($environment, ''wtrack''))'; %'isequal($type, ''run'') && (isequal($environment, ''MultipleW''))'; %%'(isequal($type, ''sleep''))'; %%%&& isequal($descript, ''post-allruns''))';%   %%% %'isequal($type, ''run'') && isequal($environment, ''WTrackA'') && (($exposure>=1) && ($exposure<=10))';  %
 
 iterator = 'epocheeganal';
 
-tetfilter = '(isequal($area,''ca1''))'; 
+tetfilter = '(isequal($area,''mec''))'; 
 
 timefilter{1} = {'get2dstate','($velocity<4)'};
 % timefilter{2} = {'kk_getriptimes','($nripples>=1)',[],'tetfilter',tetfilter,'minthresh',5};
@@ -33,7 +33,7 @@ timefilter{2} = {'getconstimes', '($cons == 1)',[eventarea,eventtype],1,...
 %----------F = createfilter('animal', animals, 'days', dayfilter,'epochs', epochfilter, 'excludetime', timefilter, 'eegtetrodes',tetfilter,'iterator', iterator);--------
 F = createfilter('animal', animals, 'days', dayfilter,'epochs', epochfilter, 'excludetime', timefilter, 'eegtetrodes',tetfilter,'iterator', iterator);
 
-%----------f = setfilteriterator(f, funcname, loadvariables, options)--------
+%----------f = setfilteriterator(f, funcname, loadvariabl   es, options)--------
 F = setfilterfunction(F, 'dfa_calcriptrigspectrogram', {'eeg', [eventarea,eventtype]},'eventtype',eventtype); 
 
 F = runfilter(F);
