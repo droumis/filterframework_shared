@@ -1,4 +1,7 @@
 **-------- flab analysis repo README----------------**
+
+*See repo Wiki for analysis-specific documentation*
+
 # **Branch management:** #
 master <-- develop <-- '<user>-dev'
 
@@ -7,12 +10,14 @@ master <-- develop <-- '<user>-dev'
 
 
 **General Repo Rules**
+
 1. **DO NOT** put anything into the develop branch with initials appended. 
+
 * The develop branch is for basic, lab-shareable code
 * Leave the kk_sj_sk_Kodez_useme_old_v4.m files in your '<user>-dev' branch
 
 
-#**Codebase map:**# 
+**Codebase map:**
 
 1. **DFAnalysis:** analysis-related functions (‘dfa_...’, other)
 
@@ -32,7 +37,3 @@ master <-- develop <-- '<user>-dev'
 
 1. Where applicable, data is stored as nested matlab cell arrays.
 * {animal}{day}{epoch}{tetrode}{cell}
-
-
-
-
