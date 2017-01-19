@@ -1,4 +1,5 @@
 % [linpos, lincoordlist] = LINEARIZEPOS(posstruct, taskstruct, index)
+%   01.18.17: renamed to createlinpos for clarity
 %          Takes each position from the specified element of posstruct and 
 %  	   projects it onto the linear trajectory segments for the environment
 %  	   and task defined in the specified element of taskstruct.
@@ -10,7 +11,7 @@
 
 % MS modified 1.10.17 from Annabelle Singer original
 
-function [linpos, segmentIndex, segdist] = ms_linearizepos(pos, task, index, coord, varargin)
+function [linpos, segmentIndex, segdist] = createlinpos(pos, task, index, coord, varargin)
 
 disp('Getting linpos...')
 % pos = posstruct{index(1)}{index(2)}.data;
@@ -42,8 +43,10 @@ trajcoord = task.linearcoord;
 % project each position point onto each segment
 ntraj = length(trajcoord);
 nseg = length(coord);
-maxsegdiff = cell(nseg,1);
+maxsegdiff = cell(nseg,1); 
 
+% maxsegdiff is the maximum allowed number of segments that
+% could be traversed from one time point to the next
 for j = 1:length(coord)
     if (size(coord{j},1) <= 3)
 	% there are only one or two segments, so maxsegdiff isn't really 

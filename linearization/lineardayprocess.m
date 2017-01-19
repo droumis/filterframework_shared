@@ -63,7 +63,7 @@ for day = days
             index = [day i];
             [linpos{day}{i}.statematrix,linpos{day}{i}.segmenttable, linpos{day}{i}.trajwells, ...
                 linpos{day}{i}.wellSegmentInfo, linpos{day}{i}.segmentInfo]...
-                = ms_linearizeposition(directoryname,fileprefix, index, 'welldist',welldist,'maxvelocity',maxv);
+                = linearizeposition_multW(directoryname,fileprefix, index, 'welldist',welldist,'maxvelocity',maxv);
             linpos{day}{i}.statematrixfields = ['time startwell endwell segment segheaddir velocity lineardist'];
             linpos{day}{i}.segmenttablefields = ['trajnum segnum segmentID'];
 
