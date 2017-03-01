@@ -1,9 +1,14 @@
+
+%% To do
+%make this compatibl with multi-antimal F output.. currently animals has to
+%be a single animal
+
 % clear all
 close all
 runFilterFramework = 0;
 saveFilterOutput = runFilterFramework;
 loadFilterOutput = 0;
-EpochMean = 0;resaveFilterOutput = 0;
+EpochMean = 1;resaveFilterOutput = 1;
 plotSpec_EpochMean = 1;
 plotSpec_allEpochs = 0;
 outputDirectory = '/typhoon/droumis/analysis';
@@ -98,22 +103,27 @@ if EpochMean == 1;
         meanspecs{t} = nanmean(F.tetout(t).S,3);
     end
 end
+
 % add tags from tetinfo struct as a field in the F.tetout
 %load the tetinfostruct
-animalinfo = animaldef('JZ1');
+animalinfo = animaldef(animals{1});
 load([animalinfo{2},animalinfo{1} 'tetinfo']);
-% areainfo = cellfetch(tetinfo, 'area');
+supareainfo = cellfetch(tetinfo, 'suparea');
+areainfo = cellfetch(tetinfo, 'area');
 subareainfo = cellfetch(tetinfo, 'subarea');
 
 %scavange the tags from each tetrode
 for ci = 1:length(F.tetout)
     tmpInds = F.tetout(ci).indices(1,:); %just grab the first Day Ep Tet ind... each tetrode should only be in one area for the duration of the exp
+    
+    targetInd = find(ismember(supareainfo.index, tmpInds, 'rows'));
+    F.tetout(ci).suptag = supareainfo.values{targetInd};
+    
+    targetInd = find(ismember(areainfo.index, tmpInds, 'rows'));
+    F.tetout(ci).areatag = areainfo.values{targetInd};
+    
     targetInd = find(ismember(subareainfo.index, tmpInds, 'rows'));
     F.tetout(ci).subtag = subareainfo.values{targetInd};
-%     targetInd = find(ismember(areainfo.index, tmpInds, 'rows'));
-%     areaTag = areainfo.values{targetInd};
-%     targetInd = find(ismember(supareainfo.index, tmpInds, 'rows'));
-%     supTag = supareainfo.values{targetInd};
 end
 
 %% ---------------- reSave Filter Output ---------------------------------------------------
@@ -138,36 +148,43 @@ if plotSpec_EpochMean == 1
     figBottom = 1;
     figHeight = 400;
     figlength = 1800;
-    subSpacing = .05;
+    sfSpacing = .05;
     
-    subStartLeft = subSpacing;
-    subEndRight = 1 - subSpacing;
-    subAllLength = subEndRight - subStartLeft;
+    sfStartLeft = sfSpacing;
+    sfEndRight = 1 - sfSpacing;
+    sfAllLength = sfEndRight - sfStartLeft;
     
-    subAllBottom = .2;
-    subAllTop = .8 - subAllBottom;
+    sfAllBottom = .2;
+    sfAllTop = .8 - sfAllBottom;
     
     figHandle = figure('Position', [figLeft, figBottom, figlength, figHeight+figBottom]);
-    subLength = subAllLength/length(tets); %normalize
-    subLeftBottom= linspace(subStartLeft, subEndRight-subLength, length(tets));
+    sfLength = sfAllLength/length(tets); %normalize
+    sfLeftBottom= linspace(sfStartLeft, sfEndRight-sfLength, length(tets));
     %     subRightTop =linspace(subLength, 1, length(tets));
     %     subLength = floor(figlength/length(tets));
     %     subLeftBottom= floor(linspace(figLeft, figlength-subLength, length(tets)));
     %     subRightTop = floor(linspace(subLength, figlength, length(tets)));
     filenameTitle = sprintf('riptrigspec\\_%s%s\\_%s\\_%sTets\\_%s', eventarea, eventtype, epochEnvironment, tetArea, cell2mat(animals));
-    subtags = [];
-    for t = 1:length(tets)
-        subtags = [subtags; F.tetout(t).subtag];
+    %if we are dealing with cortical tetrodes, sort by layer and color code
+    %the subfigure titles by layer
+    if F.tetout(1).suptag == 'ctx';
+        titletags = [];
+        for t = 1:length(tets)
+            titletags = [titletags; F.tetout(t).subtag];
+        end
+        [titleColortags, sortInds]  = sort(titletags);
+    else
+        sortInds = 1:length(tets);
+        titletags = ones(1,length(tets));
     end
-    [subtags_sorted, sortedTagsInds]  = sort(subtags);
     mycolors = lines;
     for t=1:length(tets)
         %         subplot(1, length(tets),t, 'Position', [1, 1, 10, 10])
         %         subplot(1, length(tets),t,'Position', [subLeftBottom(t)+1, figBottom+1, subRightTop(t), figHeight])
-        positionVector = [subLeftBottom(t), subAllBottom, subLength, subAllTop];
+        positionVector = [sfLeftBottom(t), sfAllBottom, sfLength, sfAllTop];
         subplot('Position', positionVector)
         %         subplot('positionVector', [subLeftBottom(t), 0, subRightTop(t), 1])
-        imagesc(F.tetout(sortedTagsInds(t)).t,F.tetout(sortedTagsInds(t)).f,meanspecs{sortedTagsInds(t)}',[-0.2,2.5])
+        imagesc(F.tetout(sortInds(t)).t,F.tetout(sortInds(t)).f,meanspecs{sortInds(t)}',[-0.2,2.5])
         set(gca,'YDir','normal')
         %         plot(rand(3,4))
         %         axis xy
@@ -179,13 +196,14 @@ if plotSpec_EpochMean == 1
             set(xlab, 'horizontalAlignment', 'left')
             ylabel('Frequency')
 %             title(sprintf('tet %d', tets(t)))
-            title(sprintf('tet:%d lr:%d', F.tetout(sortedTagsInds(t)).indices(1,3), F.tetout(sortedTagsInds(t)).subtag), 'Color',mycolors(F.tetout(sortedTagsInds(t)).subtag,:))
+            title(sprintf('nT:%d sA:%d', F.tetout(sortInds(t)).indices(1,3), titletags(sortInds(t))), 'Color',mycolors(titletags(sortInds(t)),:))
         else
             set(gca, 'YTick', []);
             set(gca,'XTick', [])
             set(gca, 'XTickLabel', [])
 %             title(sprintf('%d', tets(t)))
-            title(sprintf('tet:%d lr:%d', F.tetout(sortedTagsInds(t)).indices(1,3), F.tetout(sortedTagsInds(t)).subtag), 'Color',mycolors(F.tetout(sortedTagsInds(t)).subtag,:))
+%             title(sprintf('tet:%d lr:%d', F.tetout(sortInds(t)).indices(1,3), F.tetout(sortInds(t)).subtag), 'Color',mycolors(F.tetout(sortInds(t)).subtag,:))
+            title(sprintf('nT:%d sA:%d', F.tetout(sortInds(t)).indices(1,3), titletags(sortInds(t))), 'Color',mycolors(titletags(sortInds(t)),:))
         end
         if t == length(tets)
 %             colorbar
