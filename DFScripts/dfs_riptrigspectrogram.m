@@ -1,45 +1,72 @@
+% clear all
+close all
+runFilterFramework = 0;
+saveFilterOutput = runFilterFramework;
+loadFilterOutput = 0;
+EpochMean = 0;resaveFilterOutput = 0;
+plotSpec_EpochMean = 1;
+plotSpec_allEpochs = 0;
+outputDirectory = '/typhoon/droumis/analysis';
+%% ---------------- plotting params --------------------------
 
-%---------------- ripple triggered spectrogram parameters--------------------------
-% eventcons = 'ca1rippleskons';
+
+%% ---------------- Data Filters --------------------------
+
+animals = {'JZ1'};
+days = [1:14];
 eventtype = 'rippleskons';
 eventarea = 'ca1';
+epochEnvironment = 'wtrack'; %wtrack, wtrackrotated, openfield, sleep
+tetArea = 'mec'; %ca1, mec, por
 
 consensus_numtets = 1;   % minimum # of tets for consensus event detection
 minthresh = 2;        % STD. how big your ripples are
-exclusion_dur = 0.5;  % seconds within which consecutive events are eliminated / ignored   
+exclusion_dur = 0.5;  % seconds within which consecutive events are eliminated / ignored
 minvelocity = 0;
-maxvelocity = 4; 
+maxvelocity = 4;
 
-% ---------------- Data Filters ---------------------------------------------------
-% Animal Selection
-animals = {'JZ1'};
+filename = sprintf('riptrigspec_%s%s_%s_%sTets_%s.mat', eventarea, eventtype, epochEnvironment, tetArea, cell2mat(animals));
+%% ---------------- Run FIlter ---------------------------------------------------
+if runFilterFramework == 1;
+    if strcmp(epochEnvironment,'sleep')
+        epochType = 'sleep'; %run or sleep
+    else
+        epochType = 'run'; %run or sleep
+    end
+    epochfilter =    sprintf('(isequal($type, ''%s'')) && (isequal($environment, ''%s''))',epochType, epochEnvironment); %'isequal($type, ''run'') && (isequal($environment, ''MultipleW''))'; %%'(isequal($type, ''sleep''))'; %%%&& isequal($descript, ''post-allruns''))';%   %%% %'isequal($type, ''run'') && isequal($environment, ''WTrackA'') && (($exposure>=1) && ($exposure<=10))';  %
+    iterator = 'epocheeganal';
+    tetfilter = sprintf('(isequal($area,''%s''))', tetArea);
+    % timefilter{1} = {'get2dstate','($velocity<4)'};
+    % timefilter{2} = {'kk_getriptimes','($nripples>=1)',[],'tetfilter',tetfilter,'minthresh',5};
+    timefilter{1} = {'getconstimes', '($cons == 1)',[eventarea,eventtype],1,'consensus_numtets',consensus_numtets,...
+        'minthresh',minthresh,'exclusion_dur',exclusion_dur,'minvelocity',minvelocity,'maxvelocity',maxvelocity};
+    %----------F = createfilter('animal', animals, 'days', dayfilter,'epochs', epochfilter, 'excludetime', timefilter, 'eegtetrodes',tetfilter,'iterator', iterator);--------
+    F = createfilter('animal', animals, 'days', days,'epochs', epochfilter, 'excludetime', timefilter, 'eegtetrodes',tetfilter,'iterator', iterator);
+    %----------f = setfilteriterator(f, funcname, loadvariabl   es, options)--------
+    F = setfilterfunction(F, 'dfa_calcriptrigspectrogram', {'eeg', [eventarea,eventtype]},'eventtype',eventtype);
+    tic
+    F = runfilter(F);
+    F.filterTimer = toc;
+    F.worldDateTime = clock;
+    F.dataFilter = struct('animal', animals, 'days', days,'epochs', epochfilter, 'excludetime', timefilter, 'eegtetrodes',tetfilter,'iterator', iterator);
     
-% Day Filter
-dayfilter = 2;%:7; %6:16; %Fabio days 6-13 for S1 acquisition, 14-21 for switch
-   
-% Epoch Filter
-epochfilter =    '(isequal($type, ''run'')) && (isequal($environment, ''wtrack''))'; %'isequal($type, ''run'') && (isequal($environment, ''MultipleW''))'; %%'(isequal($type, ''sleep''))'; %%%&& isequal($descript, ''post-allruns''))';%   %%% %'isequal($type, ''run'') && isequal($environment, ''WTrackA'') && (($exposure>=1) && ($exposure<=10))';  %
-
-iterator = 'epocheeganal';
-
-tetfilter = '(isequal($area,''mec''))'; 
-
-timefilter{1} = {'get2dstate','($velocity<4)'};
-% timefilter{2} = {'kk_getriptimes','($nripples>=1)',[],'tetfilter',tetfilter,'minthresh',5};
-timefilter{2} = {'getconstimes', '($cons == 1)',[eventarea,eventtype],1,...
-                   'consensus_numtets',consensus_numtets,...
-                   'minthresh',minthresh,'exclusion_dur',exclusion_dur,'minvelocity',minvelocity,'maxvelocity',maxvelocity};
-
-%----------F = createfilter('animal', animals, 'days', dayfilter,'epochs', epochfilter, 'excludetime', timefilter, 'eegtetrodes',tetfilter,'iterator', iterator);--------
-F = createfilter('animal', animals, 'days', dayfilter,'epochs', epochfilter, 'excludetime', timefilter, 'eegtetrodes',tetfilter,'iterator', iterator);
-
-%----------f = setfilteriterator(f, funcname, loadvariabl   es, options)--------
-F = setfilterfunction(F, 'dfa_calcriptrigspectrogram', {'eeg', [eventarea,eventtype]},'eventtype',eventtype); 
-
-F = runfilter(F);
-
-%% Collect across tetrodes
-    
+    %% ---------------- Collect across tetrodes ---------------------------------------------------
+end
+%% ---------------- Save Filter Output ---------------------------------------------------
+if saveFilterOutput == 1;
+    if ~isdir(sprintf('%s/filter_output/riptrigspectrogram/', outputDirectory));
+        mkdir(sprintf('%s/filter_output/riptrigspectrogram/', outputDirectory));
+    end
+    %save the entire workspace for filter provenance
+    save(sprintf('%s/filter_output/riptrigspectrogram/riptrigspec_%s%s_%s_%sTets_%s.mat',outputDirectory, eventarea, eventtype, epochEnvironment, tetArea, cell2mat(animals)), 'F','-v7.3');
+end
+%% ---------------- Load Filter Output ---------------------------------------------------
+if loadFilterOutput == 1;
+%     load(sprintf('%s/filter_output/riptrigspectrogram/riptrigspec_%s%s_%s_%sTets_%s.mat',outputDirectory, eventarea, eventtype, epochEnvironment, tetArea, cell2mat(animals)));
+    load(sprintf('%s/filter_output/riptrigspectrogram/%s',outputDirectory,filename))
+end
+%% ---------------- Gather -------------------------------------------------------------------
+if EpochMean == 1;
     %collect all indices into dayeptet
     indices = [];
     for i=1:length(F.output{1})  % iterate over epochs
@@ -50,7 +77,6 @@ F = runfilter(F);
     
     %Collect data on individual tetrodes
     F.tetout = struct;
-    
     for t = 1:length(tets)
         inds = dayeptet(dayeptet(:,3)==tets(t),:);
         F.tetout(t).indices = inds;
@@ -60,44 +86,124 @@ F = runfilter(F);
         F.tetout(t).S=[];
         F.tetout(t).numtrigs=[];
         for c = 1:length(F.output{1})
-            if rowfind(F.output{1}(c).index,inds)~=0  
+            if rowfind(F.output{1}(c).index,inds)~=0
                 F.tetout(t).S = cat(3,F.tetout(t).S,F.output{1}(c).S);
                 F.tetout(t).numtrigs = [F.tetout(t).numtrigs; numel(F.output{1}(1).triggers)];
             end
         end
     end
-    
-%% Average and plot spectrograms
+    %compute the average per tetrode
+    meanspecs = cell(1,length(tets));
+    for t=1:length(tets)
+        meanspecs{t} = nanmean(F.tetout(t).S,3);
+    end
+end
+% add tags from tetinfo struct as a field in the F.tetout
+%load the tetinfostruct
+animalinfo = animaldef('JZ1');
+load([animalinfo{2},animalinfo{1} 'tetinfo']);
+% areainfo = cellfetch(tetinfo, 'area');
+subareainfo = cellfetch(tetinfo, 'subarea');
 
-meanspecs = cell(1,length(tets));
-
-for t=1:length(tets)
-    meanspecs{t} = mean(F.tetout(t).S,3);
+%scavange the tags from each tetrode
+for ci = 1:length(F.tetout)
+    tmpInds = F.tetout(ci).indices(1,:); %just grab the first Day Ep Tet ind... each tetrode should only be in one area for the duration of the exp
+    targetInd = find(ismember(subareainfo.index, tmpInds, 'rows'));
+    F.tetout(ci).subtag = subareainfo.values{targetInd};
+%     targetInd = find(ismember(areainfo.index, tmpInds, 'rows'));
+%     areaTag = areainfo.values{targetInd};
+%     targetInd = find(ismember(supareainfo.index, tmpInds, 'rows'));
+%     supTag = supareainfo.values{targetInd};
 end
 
-
-%plot
-for t=1:length(tets)
-    figure
-    imagesc(F.tetout(t).t,F.tetout(t).f,meanspecs{t}',[-0.2,2.5])
-    axis xy
-    xlabel('Time since start of detected SWR')
-    ylabel('Frequency')
-    colormap('jet')
-    colorbar
+%% ---------------- reSave Filter Output ---------------------------------------------------
+if resaveFilterOutput == 1;
+    if ~isdir(sprintf('%s/filter_output/riptrigspectrogram/', outputDirectory));
+        mkdir(sprintf('%s/filter_output/riptrigspectrogram/', outputDirectory));
+    end
+    %save the entire workspace for filter provenance
+    save(sprintf('%s/filter_output/riptrigspectrogram/riptrigspec_%s%s_%s_%sTets_%s.mat',outputDirectory, eventarea, eventtype, epochEnvironment, tetArea, cell2mat(animals)), 'F','-v7.3');
 end
-    
-% save('vCA3_trigtoV_riptrigspec_run.mat','F','-v7.3')
 
-%% plot by epochs
-% 
-% %plot
-% for e=1:3:length(F.output{1})
-%     figure
-%     imagesc(F.output{1}(e).t,F.output{1}(e).f,mean(F.output{1}(e).S,3)',[-0.2,2.5])
-%     axis xy
-%     xlabel('Time since start of detected SWR')
-%     ylabel('Frequency')
-%     colormap('jet')
-%     colorbar
-% end
+%% ---------------- Plot Averaged Across Epochs ---------------------------------------------------
+if plotSpec_EpochMean == 1
+    %     if ~exist('meanspecs');
+    %         meanspecs = cell(1,length(tets));
+    %         for t=1:length(tets)
+    %             meanspecs{t} = mean(F.tetout(t).S,3);
+    %         end
+    %     end
+    
+    %the total height and length of the figure dictates the sizing of the subplots
+    figLeft = 1;
+    figBottom = 1;
+    figHeight = 400;
+    figlength = 1800;
+    subSpacing = .05;
+    
+    subStartLeft = subSpacing;
+    subEndRight = 1 - subSpacing;
+    subAllLength = subEndRight - subStartLeft;
+    
+    subAllBottom = .2;
+    subAllTop = .8 - subAllBottom;
+    
+    figHandle = figure('Position', [figLeft, figBottom, figlength, figHeight+figBottom]);
+    subLength = subAllLength/length(tets); %normalize
+    subLeftBottom= linspace(subStartLeft, subEndRight-subLength, length(tets));
+    %     subRightTop =linspace(subLength, 1, length(tets));
+    %     subLength = floor(figlength/length(tets));
+    %     subLeftBottom= floor(linspace(figLeft, figlength-subLength, length(tets)));
+    %     subRightTop = floor(linspace(subLength, figlength, length(tets)));
+    filenameTitle = sprintf('riptrigspec\\_%s%s\\_%s\\_%sTets\\_%s', eventarea, eventtype, epochEnvironment, tetArea, cell2mat(animals));
+    subtags = [];
+    for t = 1:length(tets)
+        subtags = [subtags; F.tetout(t).subtag];
+    end
+    [subtags_sorted, sortedTagsInds]  = sort(subtags);
+    mycolors = lines;
+    for t=1:length(tets)
+        %         subplot(1, length(tets),t, 'Position', [1, 1, 10, 10])
+        %         subplot(1, length(tets),t,'Position', [subLeftBottom(t)+1, figBottom+1, subRightTop(t), figHeight])
+        positionVector = [subLeftBottom(t), subAllBottom, subLength, subAllTop];
+        subplot('Position', positionVector)
+        %         subplot('positionVector', [subLeftBottom(t), 0, subRightTop(t), 1])
+        imagesc(F.tetout(sortedTagsInds(t)).t,F.tetout(sortedTagsInds(t)).f,meanspecs{sortedTagsInds(t)}',[-0.2,2.5])
+        set(gca,'YDir','normal')
+        %         plot(rand(3,4))
+        %         axis xy
+        colormap('jet')
+        %             xlabel('seconds from rip start','FontSize',12,'FontWeight','bold','Color','k')
+        %             title({[sprintf('%s d%de%d %sRip(%d) Triggered %s-Spectrogram',animal, day, epoch, rippleregion, currrip, LFPtype{LFP})];[sprintf('timestamp: %16.f', centerripStartTime)]; [sprintf('peak nstds: %d', ripout{srcRegionind}{day}{epoch}.maxthresh(currrip))]},'FontSize',12,'FontWeight','bold')
+        if t == 1
+            xlab = xlabel('Time since start of detected SWR');
+            set(xlab, 'horizontalAlignment', 'left')
+            ylabel('Frequency')
+%             title(sprintf('tet %d', tets(t)))
+            title(sprintf('tet:%d lr:%d', F.tetout(sortedTagsInds(t)).indices(1,3), F.tetout(sortedTagsInds(t)).subtag), 'Color',mycolors(F.tetout(sortedTagsInds(t)).subtag,:))
+        else
+            set(gca, 'YTick', []);
+            set(gca,'XTick', [])
+            set(gca, 'XTickLabel', [])
+%             title(sprintf('%d', tets(t)))
+            title(sprintf('tet:%d lr:%d', F.tetout(sortedTagsInds(t)).indices(1,3), F.tetout(sortedTagsInds(t)).subtag), 'Color',mycolors(F.tetout(sortedTagsInds(t)).subtag,:))
+        end
+        if t == length(tets)
+%             colorbar
+            supertitle(filenameTitle)
+        end
+    end
+end
+%% ---------------- Plot By Epochs ---------------------------------------------------
+if plotSpec_allEpochs == 1;
+    for e=1:3:length(F.output{1})
+        figure
+        imagesc(F.output{1}(e).t,F.output{1}(e).f,mean(F.output{1}(e).S,3)',[-0.2,2.5])
+        axis xy
+        xlabel('Time since start of detected SWR')
+        ylabel('Frequency')
+        colormap('jet')
+        colorbar
+    end
+end
+
