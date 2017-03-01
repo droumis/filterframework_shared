@@ -133,7 +133,6 @@ if plotSpec_EpochMean == 1
     %             meanspecs{t} = mean(F.tetout(t).S,3);
     %         end
     %     end
-    
     %the total height and length of the figure dictates the sizing of the subplots
     figLeft = 1;
     figBottom = 1;
