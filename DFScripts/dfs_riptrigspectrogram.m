@@ -7,7 +7,7 @@
 close all
 runFilterFramework = 0;
 saveFilterOutput = runFilterFramework;
-loadFilterOutput = 0;
+loadFilterOutput = 1;
 EpochMean = 1;resaveFilterOutput = 1;
 plotSpec_EpochMean = 1;
 plotSpec_allEpochs = 0;
@@ -21,7 +21,7 @@ animals = {'JZ1'};
 days = [1:14];
 eventtype = 'rippleskons';
 eventarea = 'ca1';
-epochEnvironment = 'wtrack'; %wtrack, wtrackrotated, openfield, sleep
+epochEnvironment = 'openfield'; %wtrack, wtrackrotated, openfield, sleep
 tetArea = 'mec'; %ca1, mec, por
 
 consensus_numtets = 1;   % minimum # of tets for consensus event detection
@@ -98,9 +98,9 @@ if EpochMean == 1;
         end
     end
     %compute the average per tetrode
-    meanspecs = cell(1,length(tets));
+    F.meanspecs = cell(1,length(tets));
     for t=1:length(tets)
-        meanspecs{t} = nanmean(F.tetout(t).S,3);
+        F.meanspecs{t} = nanmean(F.tetout(t).S,3);
     end
 end
 
@@ -158,8 +158,8 @@ if plotSpec_EpochMean == 1
     sfAllTop = .8 - sfAllBottom;
     
     figHandle = figure('Position', [figLeft, figBottom, figlength, figHeight+figBottom]);
-    sfLength = sfAllLength/length(tets); %normalize
-    sfLeftBottom= linspace(sfStartLeft, sfEndRight-sfLength, length(tets));
+    sfLength = sfAllLength/length(F.tetout); %normalize
+    sfLeftBottom= linspace(sfStartLeft, sfEndRight-sfLength, length(F.tetout));
     %     subRightTop =linspace(subLength, 1, length(tets));
     %     subLength = floor(figlength/length(tets));
     %     subLeftBottom= floor(linspace(figLeft, figlength-subLength, length(tets)));
@@ -169,22 +169,22 @@ if plotSpec_EpochMean == 1
     %the subfigure titles by layer
     if F.tetout(1).suptag == 'ctx';
         titletags = [];
-        for t = 1:length(tets)
+        for t = 1:length(F.tetout)
             titletags = [titletags; F.tetout(t).subtag];
         end
         [titleColortags, sortInds]  = sort(titletags);
     else
-        sortInds = 1:length(tets);
-        titletags = ones(1,length(tets));
+        sortInds = 1:length(F.tetout);
+        titletags = ones(1,length(F.tetout));
     end
     mycolors = lines;
-    for t=1:length(tets)
+    for t=1:length(F.tetout)
         %         subplot(1, length(tets),t, 'Position', [1, 1, 10, 10])
         %         subplot(1, length(tets),t,'Position', [subLeftBottom(t)+1, figBottom+1, subRightTop(t), figHeight])
         positionVector = [sfLeftBottom(t), sfAllBottom, sfLength, sfAllTop];
         subplot('Position', positionVector)
         %         subplot('positionVector', [subLeftBottom(t), 0, subRightTop(t), 1])
-        imagesc(F.tetout(sortInds(t)).t,F.tetout(sortInds(t)).f,meanspecs{sortInds(t)}',[-0.2,2.5])
+        imagesc(F.tetout(sortInds(t)).t,F.tetout(sortInds(t)).f,F.meanspecs{sortInds(t)}',[-0.2,2.5])
         set(gca,'YDir','normal')
         %         plot(rand(3,4))
         %         axis xy
@@ -205,7 +205,7 @@ if plotSpec_EpochMean == 1
 %             title(sprintf('tet:%d lr:%d', F.tetout(sortInds(t)).indices(1,3), F.tetout(sortInds(t)).subtag), 'Color',mycolors(F.tetout(sortInds(t)).subtag,:))
             title(sprintf('nT:%d sA:%d', F.tetout(sortInds(t)).indices(1,3), titletags(sortInds(t))), 'Color',mycolors(titletags(sortInds(t)),:))
         end
-        if t == length(tets)
+        if t == length(F.tetout)
 %             colorbar
             supertitle(filenameTitle)
         end
