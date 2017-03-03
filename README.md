@@ -10,7 +10,9 @@ master <-- develop <-- <feature branch>
 1. **DO NOT** put anything into the shared develop branch with initials appended
 
 * The develop branch is for basic, lab-shareable code
-* Leave the kk_sj_sk_Kodez_useme_old_v4.m files in your own repo
+* Create a user-specific directory for yourself if you wish to put your kk_sj_sk_Kodez_useme_old_v4.m files
+
+2. For substantial modifications to develop, create a temporary working branch (ex: linearization-dev). 
 
 
 **Codebase map:**
@@ -26,6 +28,10 @@ master <-- develop <-- <feature branch>
 3. **DFFunctions:** filter framework data processing-related functions (‘get...’, ‘set…’, Iterators)
 
 * Examples: get2dstate, getconstimes, eegprocess, geteegtimes, getvalideegtimes
+
+4. **Process:** functions and scripts that process data into the filter framework format
+
+* Examples: createrewardinfo, createcellinfo, lineardayprocess
 
 
 
