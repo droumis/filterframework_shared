@@ -1,4 +1,3 @@
-
 function [wellsdio, rewardinfo] = createrewardinfo_lintrack(directoryname,prefix,days,epochs, varargin)
 %% This function parses DIO into a rewardinfo struct for the linear track.  In rewardinfo{day}{epoch}:
 %       Column 1 = well visited
@@ -36,15 +35,7 @@ for day=days,
     
     DIOfile = sprintf('%s/%sDIO%02d.mat', directoryname, prefix, day);
     load(DIOfile);
-    % Check that center well has more triggers than outer wells by loading epoch2
-    % Is this necessary? - NO - GET THE ORDER RIGHT
-%     li=[1 2 3];
-%     le1=length(DIO{day}{2}{dionos(1)}.pulsetimes);
-%     le2=length(DIO{day}{2}{dionos(2)}.pulsetimes);
-%     le3=length(DIO{day}{2}{dionos(3)}.pulsetimes);
-%     [len,li] = sort([le1,le2,le3],'descend');
-%     usedios=dionos(li);
-    %li=[1 2 3];
+
     if exist('inputdios','var') && exist('outputdios','var')
         % if DIO input and output bits specified in varargin, use those
         usedios = inputdios;
@@ -52,17 +43,11 @@ for day=days,
     else
     % IF you know order of DIOs - enter here. List as well 1, well 2
     
-    %% EGYPT LINEAR (need to verify)
+    %% EXAMPLE
     %usedios = [24,23];      % INPUTS: well 1, well 2
     %outdios=[8,7];            % OUTPUTS: well 1, well 2
     
-    %% DAVE LINEAR
-%     usedios = [23,24];      % INPUTS: well 1, well 2
-%     outdios=[7,8];        % OUTPUTS: well 1, well 2
-    
-    %% BRODY
-    usedios = [24,22];      % INPUTS: well 1, well 2     
-    outdios = [8,6];        % OUTPUTS: well 1, well 2
+
     end
     
     for epoch=epochs,
@@ -70,14 +55,13 @@ for day=days,
         %Initialize
         well_start=[]; well_end=[]; well_startend=[]; wellseq_curr=[]; welltrigtime_curr=[]; tmpwells=[];
         
-        DIO1=DIO{day}{epoch}{usedios(1)}; nones = length(DIO1.pulsetimes); % Center well 1: Bits 8/24 in
-        DIO2=DIO{day}{epoch}{usedios(2)}; nzeros = length(DIO2.pulsetimes); % Well 0: Bits 9/25 in
-%         DIO3=DIO{day}{epoch}{usedios(3)}; ntwos = length(DIO3.pulsetimes); % Well 2: Bits 10/26 in
-%         
+        DIO1=DIO{day}{epoch}{usedios(1)}; nones = length(DIO1.pulsetimes); % Well 0: Bits 24 in
+        DIO2=DIO{day}{epoch}{usedios(2)}; nzeros = length(DIO2.pulsetimes); % Well 1: Bits 25 in
+      
         % Output wells
-        DIOout1=DIO{day}{epoch}{outdios(1)}; nones_out = length(DIOout1.pulsetimes); % Center well 1: Bits 8 out/24
-        DIOout2=DIO{day}{epoch}{outdios(2)}; nzeros_out = length(DIOout2.pulsetimes); % Well 0: Bits 9 out/25
-%         DIOout3=DIO{day}{epoch}{outdios(3)}; ntwos_out = length(DIOout3.pulsetimes); % Well 2: Bits 10 out/26
+        DIOout1=DIO{day}{epoch}{outdios(1)}; nones_out = length(DIOout1.pulsetimes); % Well 0: Bits 8 out
+        DIOout2=DIO{day}{epoch}{outdios(2)}; nzeros_out = length(DIOout2.pulsetimes); % Well 1: Bits 9 out
+
         out_trigt = [DIOout1.pulsetimes(:,1);DIOout2.pulsetimes(:,1)];
         [out_trigtx, out_ord] = sort(out_trigt);
         out_wells = [1*ones(nones_out,1);0*ones(nzeros_out,1)];
@@ -94,8 +78,6 @@ for day=days,
         % For saving
         wellsdio{day}{epoch}=well_startend;
         
-        % NEW
-        % ----
         wellseq_curr=[wfx(1);wfx(swit)];
         welltrigtime_curr=[tfx(1);tfx(swit)];
         
@@ -131,7 +113,7 @@ for day=days,
         wrong_in = setdiff(inbound_stidx,correct_in);
         %inbound_logic(corr) = 1;
         
-        % IMP - Put first Outbound Back In If It Was Removed - Have to Push all indexes By 1
+        % IMPORTANT - Put first Outbound Back In If It Was Removed - Have to Push all indexes By 1
         %if wellseq_curr(1)~=1,
         if wellseq_curr(1)==1,
             first = well_startend(1,:);
@@ -178,14 +160,14 @@ for day=days,
         rewardinfo{day}{epoch} = rewardinfo_curr;
         
     end
-    %wellseq_out = ending well of trajectory (column 2 of wellsdio)
-    %welltrigtime_out = input trigger time at that well
-    %logic = 1 is correct, 0 is incorrect
-    %trajsec_out = 10 is inbound trial, 11 is outbound trial; does not
-    %    reflect whether trial is correct, only location of well
-    %welltrigtime_out_updated = output trigger time at that well (only
-    %    updated if correct trial); NOTE: for trials with 500 ms delay between input and output, make sure abs(difft)>500, to 
-    %    include output times that are within something greater than 500 ms from the input time 
+      % Columns of rewardinfo:
+        % 1 = end well of trajectory (column 2 of wellsdio)
+        % 2 = output time; reward delivery time on correct trials, input time on incorrect trials
+        %       NOTE: for trials with (e.g.) 500 ms delay between input and output, make sure abs(difft)>500, to 
+        %       include output times that are within something greater than 500 ms from the input time
+        % 3 = logic; 1 is correct, 0 is incorrect
+        % 4 = trial type; 10 is inbound, 11 is outbound
+        % 5 = input (nosepoke) time on all trials
     
     
     

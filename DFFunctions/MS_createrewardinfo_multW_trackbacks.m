@@ -59,12 +59,27 @@ for day=days,
     else
         %If you know order of INPUT DIOs, enter here: list DIO cells in order 0, 1, 2, 3, 4, 5 (where 2 is center on S2, 3 is center on S1)
 
-        % EXAMPLE
         switch prefix
+            case 'che'
+                % CHEKOV & DAX
+                indios = [32,31,27,29,30,28];
+                animflag = 1;
+            case 'dax'
+                % CHEKOV & DAX
+                indios = [32,31,27,29,30,28];
+                animflag = 2;
+            case 'eli'
+                % ELIOT
+                indios = [20,21,22,23,24,19];
+                animflag = 3;
             case 'fab'
                 % FABIO
                 indios = [32, 31, 30, 29, 28, 27];
                 animflag = 4;
+            case 'ger'
+                % GERONIMO
+                indios = [24,23,22,21,20,19];
+                animflag = 5;
         end
     end
     
@@ -75,20 +90,33 @@ for day=days,
             L = 2; C = 3; R = 4;
             if exist('outputdios','var')
                 outdios = outputdios;
-            else % EXAMPLE
-                if animflag == 4
-                outdios = [8,7,6];       % for S1, Fab       % OUTPUTS: list DIO cells in order left, center, right (of reality, not pos reconstruct) (e.g. 2 3 4) 
+            else
+                if animflag == 1 || animflag == 2
+                outdios = [8,7,6];       % for S1, Che/Dax       % OUTPUTS: list DIO cells in order left, center, right (of reality, not pos reconstruct) (e.g. 2 3 4) 
+                elseif animflag == 3
+                outdios = [6,7,8];        % for Eli
+                elseif animflag == 4
+                  outdios = [8, 7, 6];       %for Fab
+                   elseif animflag == 5
+                  outdios = [7, 6, 5];       %for Ger
                 end
             end
         elseif strcmp(sequencetype(runnum,:),'S2')
              L = 1; C = 2; R = 3;
-             if exist('outputdios','var')
-                 outdios = outputdios;
-             else % EXAMPLE
-                 if animflag == 4
-                     outdios = [5,8,7];       % for S2, Fab
-                 end
-             end
+            if exist('outputdios','var')
+                outdios = outputdios;
+            else
+            if animflag == 1 || animflag == 2
+                    outdios = [5,8,7];       % for S2, Che/Dax
+                elseif animflag == 3
+                    outdios = [5,6,7];       % for Eli
+                elseif animflag == 4
+                    outdios = [5, 8, 7];        %for Fab
+                    elseif animflag == 5
+                    outdios = [8, 7, 6];        %for Ger
+                end
+            end
+        end
 
 
      % Output wells
@@ -104,6 +132,10 @@ for day=days,
         end
         % Delete NaNs
         filled_outdios(isnan(filled_outdios))=[];
+        
+%         DIOoutL=DIO{day}{epoch}{outdios(1)}; 
+%         DIOoutC=DIO{day}{epoch}{outdios(2)}; 
+%         DIOoutR=DIO{day}{epoch}{outdios(3)}; 
         
         % Collect output trigger times and well IDs for non-empty output DIOs
         wellID = zeros(1,length(filled_outdios));
@@ -122,6 +154,8 @@ for day=days,
         out_wells = [out_wells; wellID(j)*ones(size(DIO{day}{epoch}{filled_outdios(j)}.pulsetimes,1),1)];
         end 
         
+%         out_trigtimes = [DIOoutL.pulsetimes(:,1);DIOoutC.pulsetimes(:,1);DIOoutR.pulsetimes(:,1)];
+%         out_wells = [L*ones(size(DIOoutL.pulsetimes,1),1);C*ones(size(DIOoutC.pulsetimes,1),1);R*ones(size(DIOoutR.pulsetimes,1),1)];
         out_all = [out_trigtimes out_wells]; 
         % Sort well visits chronologically
         out_all = sortrows(out_all,1);
@@ -176,6 +210,17 @@ for day=days,
         in_all = [in_trigtimes in_wells]; 
         % Sort well visits chronologically
         in_all = sortrows(in_all,1);
+        
+%         DIOin0=DIO{day}{epoch}{indios(1)}; 
+%         DIOin1=DIO{day}{epoch}{indios(2)}; 
+%         DIOin2=DIO{day}{epoch}{indios(3)}; 
+%         DIOin3=DIO{day}{epoch}{indios(4)}; 
+%         DIOin4=DIO{day}{epoch}{indios(5)};
+%         DIOin5=DIO{day}{epoch}{indios(6)};
+        
+%         in_trigtimes = [DIOin0.pulsetimes(:,1);DIOin1.pulsetimes(:,1);DIOin2.pulsetimes(:,1);DIOin3.pulsetimes(:,1);DIOin4.pulsetimes(:,1);DIOin5.pulsetimes(:,1)];
+%         in_wells = [zeros(length(DIOin0.pulsetimes),1);ones(length(DIOin1.pulsetimes),1);2*ones(length(DIOin2.pulsetimes),1);3*ones(length(DIOin3.pulsetimes),1);4*ones(length(DIOin4.pulsetimes),1);5*ones(length(DIOin5.pulsetimes),1)];
+
         
         %% Remove erroneous input triggers, BUT KEEP TRACKBACK ERRORS 
         % 1. To use as a check later, find whether a trigger is the first
@@ -256,8 +301,16 @@ for day=days,
         % prev prev was anything but the current well (accounts for prev
         % prev inbound errors to nonrewarded wells), unless this outbound
         % follows a trackback error.
+                % (Starting Day 7? - for now all days) for Chekov & Dex, assign outbounds to home-adjacent wells as correct if prev prev visit was to the
+                % opposite home adjacent well, even if that well was visited on an incorrect inbound trial (example: 5-4-3-2 --> 2 should be correct
+                % even though 4 was not).  
+                % (!!) NOTE: for Chekov and Dax, on Day 1 I didn't reward all of these types of trials, 
+                % so there may be either missing (or extraneous - see below)
+                % output timestamps on early days, but the logic be correct according to final rules.
         
         % (B) Also assigns as INCORRECT any outbound home-adjacent visits where prev prev well was the same as the current well, even if this was on an incorrect inbound.
+                % (!!) NOTE: for Chekov and Dax, on Days 2-6 I rewarded if either home-adjacent arm was prev prev following an inbound error, 
+                % not restricting it to opposite (these are currently all labeled as incorrect according to final rules).
                 
         %(C)  After the above are completed, find outbound trials that follow
         % trackback errors, and scan back in time to assign logic based on

@@ -163,14 +163,23 @@ for day=days,
     end
     
         % Columns of rewardinfo:
-        % 1 = end well of trajectory (column 2 of wellsdio)
-        % 2 = output time; reward delivery time on correct trials, input time on incorrect trials
-        %       NOTE: for trials with (e.g.) 500 ms delay between input and output, make sure abs(difft)>500, to 
-        %       include output times that are within something greater than 500 ms from the input time
+        % 1 = end well of trajectory
+        % 2 = output (reward delivery) time on correct trials
         % 3 = logic; 1 is correct, 0 is incorrect
         % 4 = trial type; 10 is inbound, 11 is outbound
         % 5 = input (nosepoke) time on all trials
-         
+    %wellseq_out = ending well of trajectory (column 2 of wellsdio)
+    %welltrigtime_out = output trigger time at that well (only
+    %    updated if correct trial); NOTE: for trials with 500 ms delay between input and output, make sure abs(difft)>500, to 
+    %    include output times that are within something greater than 500 ms from the input time
+    %logic = 1 is correct, 0 is incorrect
+    %trajsec_out = 10 is inbound trial, 11 is outbound trial; does not
+    %    reflect whether trial is correct, only location of well
+    %welltrigtime_out_updated =  input trigger time at that well
+    
+    
+    
+    
     eval([lowercasethree,'wellsdio = wellsdio;']); eval([lowercasethree,'rewardinfo = rewardinfo;']);
     if (directoryname(end) ~= '/')
         animdirect = [directoryname '/'];

@@ -1,4 +1,4 @@
-function [wellsdio, rewardinfo] = createrewardinfo_multW_trackbacks(directoryname,prefix,days,epochs,rewarddelay,varargin)
+function [wellsdio, rewardinfo] = createrewardinfo_multW(directoryname,prefix,days,epochs,rewarddelay,varargin)
 %% This function parses DIO into a rewardinfo struct for the multiple W track.  In rewardinfo{day}{epoch}:
 %       Column 1 = well visited
 %       Column 2 = output timestamp (reward delivery) in NSpike time units 
@@ -44,12 +44,9 @@ for day=days,
         dsz = '0';
     end
     
-    DIOfile = sprintf('%s/%sDIO%02d.mat', directoryname, prefix, day);
-    posfile = sprintf('%s/%spos%02d.mat', directoryname, prefix, day);
-    load(DIOfile);
-    load(posfile);
     
-        
+    DIOfile = sprintf('%s/%sDIO%02d.mat', directoryname, prefix, day);
+    load(DIOfile);
     if ~exist('sequencetype','var')
         sequencetype = ['S1'; 'S1'; 'S1']; %default if unspecified, applies to S1 acquisition days
     end
@@ -59,12 +56,27 @@ for day=days,
     else
         %If you know order of INPUT DIOs, enter here: list DIO cells in order 0, 1, 2, 3, 4, 5 (where 2 is center on S2, 3 is center on S1)
 
-        % EXAMPLE
         switch prefix
+            case 'che'
+                % CHEKOV & DAX
+                indios = [32,31,27,29,30,28];
+                animflag = 1;
+            case 'dax'
+                % CHEKOV & DAX
+                indios = [32,31,27,29,30,28];
+                animflag = 2;
+            case 'eli'
+                % ELIOT
+                indios = [20,21,22,23,24,19];
+                animflag = 3;
             case 'fab'
                 % FABIO
                 indios = [32, 31, 30, 29, 28, 27];
                 animflag = 4;
+            case 'ger'
+                % GERONIMO
+                indios = [24,23,22,21,20,19];
+                animflag = 5;
         end
     end
     
@@ -75,23 +87,36 @@ for day=days,
             L = 2; C = 3; R = 4;
             if exist('outputdios','var')
                 outdios = outputdios;
-            else % EXAMPLE
-                if animflag == 4
-                outdios = [8,7,6];       % for S1, Fab       % OUTPUTS: list DIO cells in order left, center, right (of reality, not pos reconstruct) (e.g. 2 3 4) 
+            else
+                if animflag == 1 || animflag == 2
+                outdios = [8,7,6];       % for S1, Che/Dax       % OUTPUTS: list DIO cells in order left, center, right (of reality, not pos reconstruct) (e.g. 2 3 4) 
+                elseif animflag == 3
+                outdios = [6,7,8];        % for Eli
+                elseif animflag == 4
+                  outdios = [8, 7, 6];       %for Fab
+                  elseif animflag == 5
+                  outdios = [7, 6, 5];       %for Ger
                 end
             end
         elseif strcmp(sequencetype(runnum,:),'S2')
-             L = 1; C = 2; R = 3;
-             if exist('outputdios','var')
-                 outdios = outputdios;
-             else % EXAMPLE
-                 if animflag == 4
-                     outdios = [5,8,7];       % for S2, Fab
-                 end
-             end
+            L = 1; C = 2; R = 3;
+            if exist('outputdios','var')
+                outdios = outputdios;
+            else
+                if animflag == 1 || animflag == 2
+                    outdios = [5,8,7];       % for S2, Che/Dax
+                elseif animflag == 3
+                    outdios = [5,6,7];       % for Eli
+                elseif animflag == 4
+                    outdios = [5, 8, 7];        %for Fab
+                    elseif animflag == 5
+                    outdios = [8, 7, 6];        %for Ger
+                end
+            end
+        end
 
 
-     % Output wells
+    % Output wells
         %First check if any output DIOs are empty
         filled_outdios = outdios;
         for i = 1:length(outdios)
@@ -104,6 +129,11 @@ for day=days,
         end
         % Delete NaNs
         filled_outdios(isnan(filled_outdios))=[];
+        
+        %Collect output times
+%         DIOoutL=DIO{day}{epoch}{outdios(1)}; 
+%         DIOoutC=DIO{day}{epoch}{outdios(2)}; 
+%         DIOoutR=DIO{day}{epoch}{outdios(3)}; 
         
         % Collect output trigger times and well IDs for non-empty output DIOs
         wellID = zeros(1,length(filled_outdios));
@@ -122,6 +152,8 @@ for day=days,
         out_wells = [out_wells; wellID(j)*ones(size(DIO{day}{epoch}{filled_outdios(j)}.pulsetimes,1),1)];
         end 
         
+%         out_trigtimes = [DIOoutL.pulsetimes(:,1);DIOoutC.pulsetimes(:,1);DIOoutR.pulsetimes(:,1)];
+%         out_wells = [L*ones(size(DIOoutL.pulsetimes,1),1);C*ones(size(DIOoutC.pulsetimes,1),1);R*ones(size(DIOoutR.pulsetimes,1),1)];
         out_all = [out_trigtimes out_wells]; 
         % Sort well visits chronologically
         out_all = sortrows(out_all,1);
@@ -177,30 +209,22 @@ for day=days,
         % Sort well visits chronologically
         in_all = sortrows(in_all,1);
         
-        %% Remove erroneous input triggers, BUT KEEP TRACKBACK ERRORS 
-        % 1. To use as a check later, find whether a trigger is the first
-        % one at that well: 0 indicates that it is NOT the first input
-        first_input = [1; diff(in_all(:,2))]; % pad with a 1 at the beginning, since 1st recorded input of epoch has to be the first input at that well 
-        % 2. Look up all input trigger times in position data 
-        posind=lookup(in_all(:,1)/10000,pos{day}{epoch}.data(:,1));
-        % 3. Find the max Y distance traveled between the each trigger
-        % and its previous trigger - assumes position is oriented with
-        % track arms along the Y axis
-        maxposchange = NaN; %pad with NaN for the first recorded input of the epoch
-            for i = 2:length(posind)
-                trajectory = pos{day}{epoch}.data(posind(i-1):posind(i),3); % all Y position points between triggers
-                currYpos = pos{day}{epoch}.data(posind(i),3); % Y pos of the current trigger
-                poschange = currYpos-trajectory; % subtract to get the distance traveled at each point
-                maxposchange = [maxposchange; max(abs(poschange))]; % find the maximum distance traveled on the trajectory between triggers
-            end
-        %sanity checks of maxposchange against well IDs and first_input
-        check1 = [maxposchange in_all(:,2)];
-        check2 = [maxposchange first_input];
-        % 4. To include trackback errors: keep input triggers where rat traveled >= 48 in the Y direction
-        % between triggers. Cutoff = 48 = halfway down the arm, since that's when rat's tail clears
-        %the well and there is no more possibility of an erroneous trigger 
-        keep_inputs = [in_all(1,:); in_all(maxposchange>=48,:)];
-        keep_maxposchange = [NaN; maxposchange(maxposchange>=48)];
+%         DIOin0=DIO{day}{epoch}{indios(1)}; 
+%         DIOin1=DIO{day}{epoch}{indios(2)}; 
+%         DIOin2=DIO{day}{epoch}{indios(3)}; 
+%         DIOin3=DIO{day}{epoch}{indios(4)}; 
+%         DIOin4=DIO{day}{epoch}{indios(5)};
+%         DIOin5=DIO{day}{epoch}{indios(6)};
+        
+%         in_trigtimes = [DIOin0.pulsetimes(:,1);DIOin1.pulsetimes(:,1);DIOin2.pulsetimes(:,1);DIOin3.pulsetimes(:,1);DIOin4.pulsetimes(:,1);DIOin5.pulsetimes(:,1)];
+%         in_wells = [zeros(length(DIOin0.pulsetimes),1);ones(length(DIOin1.pulsetimes),1);2*ones(length(DIOin2.pulsetimes),1);3*ones(length(DIOin3.pulsetimes),1);4*ones(length(DIOin4.pulsetimes),1);5*ones(length(DIOin5.pulsetimes),1)];
+
+        
+        %%  Remove multiple input triggers - keep only the first nosepoke
+        % **NOTE: this excludes trackback errors currently.
+        first_input = [1; diff(in_all(:,2))]; % pad with a 1 at the beginning, since 1st recorded input has to be the first input at that well
+        keep = find(first_input~=0);
+        keep_inputs = in_all(keep,:);
         % Create a matrix of starts and ends of each trajectory, in which 3rd column has input timestamps of trajectory end well  
         well_startend=[keep_inputs(1:end-1,2) keep_inputs(2:end,2) keep_inputs(2:end,1)]; 
         % Re-Add first captured "inbound" trial (center well visit that starts the session)
@@ -224,7 +248,7 @@ for day=days,
         correct_outbound = find(all_outbound(2:end,2)~=all_outbound(1:end-1,2)); % first find alternations (current end well is different than previous end well)
         correct_outbound = correct_outbound+1; % Push indices by 1 to align to all_outbound, since we exclude the 1st trial
         outbound_logic(correct_outbound)=1;  % assign alternations as correct
-        nonrewarded = wellID((wellID~=L & wellID~=R));  % now find alternations that end at wells that are not L and R
+        nonrewarded = wellID((wellID~=L & wellID~=R));  % now find wells that are not L or R
         % Revert logic to 0 for "correct" alternations to wells that are not L or R
         incorrect_index = find(ismember(all_outbound(correct_outbound,2),nonrewarded)); 
         revert = correct_outbound(incorrect_index);
@@ -252,18 +276,17 @@ for day=days,
         all_trials = sortrows(all_trials,3);
         
         %% Special case updates to logic
-        % (A) Assigns as correct any outbound home-adjacent visits where
-        % prev prev was anything but the current well (accounts for prev
-        % prev inbound errors to nonrewarded wells), unless this outbound
-        % follows a trackback error.
+        % Assigns as correct any outbound home-adjacent visits where prev prev was anything but the current well (accounts for prev prev inbound errors to nonrewarded wells) 
+                % (Starting Day 7? - for now all days) for Chekov & Dex, assign outbounds to home-adjacent wells as correct if prev prev visit was to the
+                % opposite home adjacent well, even if that well was visited on an incorrect inbound trial (example: 5-4-3-2 --> 2 should be correct
+                % even though 4 was not).  
+                % (!!) NOTE: for Chekov and Dax, on Day 1 I didn't reward all of these types of trials, 
+                % so there may be either missing (or extraneous - see below)
+                % output timestamps on early days, but the logic be correct according to final rules.
         
-        % (B) Also assigns as INCORRECT any outbound home-adjacent visits where prev prev well was the same as the current well, even if this was on an incorrect inbound.
-                
-        %(C)  After the above are completed, find outbound trials that follow
-        % trackback errors, and scan back in time to assign logic based on
-        % most recent non-trackback. (trackbacks on inbound trials should
-        % already be assigned as incorrect, since they don't end in the
-        % home arm).
+        % Also assigns as INCORRECT any outbound home-adjacent visits where prev prev well was the same as the current well, even if this was on an incorrect inbound.
+                % (!!) NOTE: for Chekov and Dax, on Days 2-6 I rewarded if either home-adjacent arm was prev prev following an inbound error, 
+                % not restricting it to opposite (these are currently all labeled as incorrect according to final rules).
        
         find_L = find(all_trials(:,2)==L);
         find_R = find(all_trials(:,2)==R);
@@ -273,35 +296,18 @@ for day=days,
             if prev_ind ~=0 && prevprev_ind~=0
                 prev_well = all_trials(prev_ind,2);
                 prevprev_well = all_trials(prevprev_ind,2);
-                % (A) update corrects that are not following a trackback
-                if prev_well==C && prevprev_well~=L && prevprev_well~=C
+                if prev_well==C && prevprev_well~=L 
+                    find_L(p);
                     if all_trials(find_L(p),4) == 0
                     disp(['update index' ' ' num2str(find_L(p))]); %displays indices of all_trials that actually updated
                     end
                     all_trials(find_L(p),4)=1;
-                % (B) update incorrects
                 elseif prev_well==C && prevprev_well==L
+                    find_L(p);
                     if all_trials(find_L(p),4) == 1
                     disp(['update index' ' ' num2str(find_L(p))]); %displays indices of all_trials that actually updated
                     end
                     all_trials(find_L(p),4)=0;
-                % (C) update incorrect trials after trackbacks 
-                % - correct trials should already be labeled as correct
-                elseif prev_well==C && prevprev_well==C %this may not work if there is a legitimate trackback within the first few trials
-                    scanwell = all_trials(prev_ind,2); %start with prev_well, C
-                    while scanwell==C && prev_ind~=0
-                        prev_ind = prev_ind-1;
-                        if prev_ind==0
-                            break
-                        end
-                        scanwell = all_trials(prev_ind,2);
-                    end
-                    if scanwell==L
-                        if all_trials(find_L(p),4) == 1
-                            disp(['update index' ' ' num2str(find_L(p))]); %displays indices of all_trials that actually updated
-                        end
-                    all_trials(find_L(p),4)=0;
-                    end
                 end
             end
         end
@@ -311,32 +317,18 @@ for day=days,
             if prev_ind ~=0 && prevprev_ind~=0
                 prev_well = all_trials(prev_ind,2);
                 prevprev_well = all_trials(prevprev_ind,2);
-                % (A) update corrects that are not following a trackback
-                if prev_well==C && prevprev_well~=R && prevprev_well~=C
+                if prev_well==C && prevprev_well~=R 
+                    find_R(p);
                     if all_trials(find_R(p),4) == 0
                     disp(['update index' ' ' num2str(find_R(p))]); %displays indices of all_trials that actually updated
                     end
                     all_trials(find_R(p),4)=1;
-                % (B) update incorrects
                 elseif prev_well==C && prevprev_well==R
+                    find_R(p);
                     if all_trials(find_R(p),4) == 1
                     disp(['update index' ' ' num2str(find_R(p))]); %displays indices of all_trials that actually updated
                     end
                     all_trials(find_R(p),4)=0;
-                % (C) update incorrect trials after trackbacks 
-                % - correct trials should already be labeled as correct
-                elseif prev_well==C && prevprev_well==C %this may not work if there is a legitimate trackback within the first few trials
-                    scanwell = all_trials(prev_ind,2); %start with prev_well, C
-                    while scanwell==C && prev_ind~=1
-                        prev_ind = prev_ind-1;
-                        scanwell = all_trials(prev_ind,2);
-                    end
-                    if scanwell==R
-                        if all_trials(find_R(p),4) == 1
-                            disp(['update index' ' ' num2str(find_R(p))]); %displays indices of all_trials that actually updated
-                        end
-                    all_trials(find_R(p),4)=0;
-                    end
                 end
             end
         end
@@ -362,8 +354,7 @@ for day=days,
             % align by looking up output times, which have to be correct)
         all_trials(replace,6) = possible_outputs(replace,1);
         % Sanity check - can display if desired
-        checkreplace = [all_trials(:,6)-all_trials(:,3) all_trials(:,4)];
-        checkall = [keep_maxposchange all_trials];
+        check = [all_trials(:,6)-all_trials(:,3) all_trials(:,4)];
         
         %% Restructure all_trials into existing rewardinfo structure from Shantanu
         
@@ -384,13 +375,12 @@ for day=days,
         
         if oppositesequence %rename saved variable as oppseqrewardinfo, and filename as oppseqrewardinfo
             oppseqrewardinfo = rewardinfo;
-            filename = sprintf('%s/%soppseqrewardinfo%d%d.mat',directoryname,prefix,str2num(dsz),day);
+            filename = sprintf('%s/%snoTBoppseqrewardinfo%d%d.mat',directoryname,prefix,str2num(dsz),day);
              save(filename,'oppseqrewardinfo');
         else %save rewardinfo for the rewarded sequence
-    filename = sprintf('%s/%srewardinfo%d%d.mat',directoryname,prefix,str2num(dsz),day);
-filename2 = sprintf('%s/%swellsdio%d%d.mat',directoryname,prefix,str2num(dsz),day);
+    filename = sprintf('%s/%snoTBrewardinfo%d%d.mat',directoryname,prefix,str2num(dsz),day);
+
     save(filename,'rewardinfo');
-    save(filename2,'wellsdio');
         end
     
    
