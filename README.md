@@ -2,10 +2,15 @@
 
 *See repo Wiki for analysis-specific documentation*
 
-# **Branch management:** #
+**Branch management:**
 master <-- develop <-- <feature branch>
 
-**General Repo Rules**
+**Data storage:**
+ Where applicable, data is stored as nested matlab cell arrays.
+
+ * {animal}{day}{epoch}{tetrode}{cell}
+
+#**General Repo Rules**#
 
  **DO NOT** put anything into the shared develop branch with initials appended
 
@@ -15,7 +20,7 @@ master <-- develop <-- <feature branch>
  For substantial modifications to develop, create a temporary working branch (ex: linearization-dev). 
 
 
-**Codebase map:**
+#**Codebase map:**#
 
  **DFAnalysis:** analysis-related functions (‘dfa_...’, other)
 
@@ -33,9 +38,6 @@ master <-- develop <-- <feature branch>
 
 * Examples: createrewardinfo, createcellinfo, lineardayprocess
 
+**Scripts** and **Functions:**  Plotting scripts and functions that exist outside of filter framework
 
-
-**General Info:**
-
- Where applicable, data is stored as nested matlab cell arrays.
- * {animal}{day}{epoch}{tetrode}{cell}
+* Example: plotraster
