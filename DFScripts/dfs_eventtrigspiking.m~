@@ -1,5 +1,5 @@
 %% Plot event (such as ripple) -triggered spike rasters and psths, and calculate significance of ripple modulation for each cell
-% MS updated Jan 2017; originally adapted from Kenny's dfskk_eventtriggeredspiking
+% MS updated Feb 2017; originally adapted from Kenny's dfskk_eventtriggeredspiking
 
 %%%%% GENERAL PARAMETERS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
 eventconsname = 'vca1ripplescons';
@@ -9,14 +9,14 @@ epochtype = 'run';
 
 runscript = 1; 
 usedayfilter = 1;
-dayfilter = [5];
+dayfilter = 5;              % enter days to filter here
 postprocessing = 1;             
-calcsig = 1;
+calcsig = 1;                % calculate significance of each cell's SWR-modulation
 
 plot_singlerasters = 1; 
 if plot_singlerasters  
        savefigs = 0;
-       saveA_tofile = 0;
+       savedatastruct_tofile = 0;
 end
 
 %%% SPARSIFY %%%
@@ -53,7 +53,7 @@ switch eventconsname
         timefilter = { {'getconstimes', '($cons == 1)', 'dca1ripplescons',1,...
             'consensus_numtets',consensus_numtets,'minthresh',minthresh,'exclusion_dur',exclusion_dur,'maxvelocity',maxvelocity} };
     case 'vsubripplescons' 
-        datadir = '/opt/data40/mari/Eli/';                  
+        datadir = sprintf('/opt/data40/mari/%s/',anim);                 
         TF = 1; %'(isequal($validripple, 1))';              
         consensus_numtets = 1;                              
         exclude_ripples = 0;  
@@ -65,7 +65,7 @@ switch eventconsname
         timefilter = { {'getconstimes', '($cons == 1)', 'vsubripplescons',1,...
             'consensus_numtets',consensus_numtets,'minthresh',minthresh,'exclusion_dur',exclusion_dur,'maxvelocity',maxvelocity} };
         case 'vca3ripplescons' 
-        datadir = '/opt/data40/mari/Eli/';        
+        datadir = sprintf('/opt/data40/mari/%s/',anim);        
         TF = 1; %'(isequal($validripple, 1))';       
         consensus_numtets = 1;   
         exclude_ripples = 0;  
@@ -96,12 +96,7 @@ end
  if runscript
      
      % Cell filter
-     %     ca1cellfilter = '(isequal($area, ''CA1''))';
-     %     ca2cellfilter = '(isequal($area, ''CA2'') )';
-     %     ca3cellfilter = '(isequal($area, ''CA3''))';
-     %     dgcellfilter = '(isequal($area, ''DG'') )';
-     %     septcellfilter = '(isequal($area, ''septal''))';
-     naccellfilter = '(isequal($area, ''NAc'') && ($numspikes > 100))';  %'(isequal($area, ''NAc''))';
+     cellfilter = '(isequal($area, ''NAc'') && ($numspikes > 100))';  
      
      % Iterator
      iterator = 'singlecellanal';
@@ -112,41 +107,41 @@ end
          animaldir = animalinfo{2};
          animalprefix = animalinfo{3};
          if strcmp(epochtype,'sleep')
-             epochfilter =  '(isequal($type, ''sleep''))'; % '(isequal($type,''run'') && isequal($environment,''MultipleW''))';% %% || (isequal($type,''run'') && isequal($environment,''MultipleW''))'; %
+             epochfilter =  '(isequal($type, ''sleep''))'; 
          elseif strcmp(epochtype,'run')
              epochfilter =  '(isequal($type,''run'') && isequal($environment,''MultipleW''))';
          end
          
          % Filter Creation
          if usedayfilter
-             nacf = createfilter('animal', animal,'days',dayfilter,'epochs', epochfilter, 'cells', naccellfilter, 'excludetime', timefilter, 'iterator', iterator);
+             f = createfilter('animal', animal,'days',dayfilter,'epochs', epochfilter, 'cells', cellfilter, 'excludetime', timefilter, 'iterator', iterator);
          else
              % ca1f = createfilter('animal', animal, 'epochs', epochfilter, 'cells', ca1cellfilter, 'excludetime', timefilter, 'iterator', iterator);
-             nacf = createfilter('animal', animal,'epochs', epochfilter, 'cells', naccellfilter, 'excludetime', timefilter, 'iterator', iterator);
+             f = createfilter('animal', animal,'epochs', epochfilter, 'cells', cellfilter, 'excludetime', timefilter, 'iterator', iterator);
          end
          
          % Set Analysis Function
          % ca1f = setfilterfunction(ca1f, 'dfakk_geteventtriggeredspiking', {'spikes',eventconsname,'pos','task','sleep','cellinfo'},animaldir,animalprefix,'TF',TF,'window',window,'binsize',binsize,'minthresh',minthresh,'maxvelocity',maxvelocity,'minvelocity', minvelocity,'consensus_numtets',consensus_numtets,'welldist',welldist);
-         nacf = setfilterfunction(nacf, 'dfams_geteventtrigspiking', {'spikes',eventconsname,'pos','task','sleep','cellinfo'},animaldir,animalprefix,'TF',TF,'window',window,'binsize',binsize,'frbinsize',frbinsize,'minthresh',minthresh,'maxvelocity',maxvelocity,'minvelocity', minvelocity,'consensus_numtets',consensus_numtets,'welldist',welldist);
+         f = setfilterfunction(f, 'dfams_geteventtrigspiking', {'spikes',eventconsname,'pos','task','sleep','cellinfo'},animaldir,animalprefix,'TF',TF,'window',window,'binsize',binsize,'frbinsize',frbinsize,'minthresh',minthresh,'maxvelocity',maxvelocity,'minvelocity', minvelocity,'consensus_numtets',consensus_numtets,'welldist',welldist);
          
          % Run Analysis
          % ca1f = runfilter(ca1f);
-         nacf = runfilter(nacf);
+         f = runfilter(f);
          
          % append runscript parameters to the raw output structs
          runscript_params = paramsstruct(eventconsname,timefilter,window,binsize,time,consensus_numtets,minthresh,exclusion_dur);
          %     ca1f.runscript_params = runscript_params;
-         nacf.runscript_params = runscript_params;
+         f.runscript_params = runscript_params;
          
+         % if running for multiple regions and you want to save the output for future use
          % cd(datadir)
-         % save(sprintf('Super%s_raw_%s_%s',eventconsname,animal{1}(1:3),date),'ca1f','ca2f','ca3f','dgf','septf','animal','-v7.3');
-         % clear ca1f; clear ca2f; clear ca3f; clear dgf; clear septf;
+         % save(sprintf('Super%s_raw_%s_%s',eventconsname,animal{1}(1:3),date),'ca1f','ca2f','ca3f','dgf','nacf','animal','-v7.3');
          
      end
      
  end
- 
- f = nacf;
+
+ % f = nacf;
 
 %% POSTPROCESSING
 
@@ -158,28 +153,15 @@ if postprocessing
         animalinfo = animaldef(animal{1});
         cellinfo = loaddatastruct(animalinfo{2}, animalinfo{3}, 'cellinfo');
         
-        % initialize output - supervar is useful if running for
-        % multiple regions and you want to save the output for future use
-%         clear supervar
-%         supervar.animalname = animal{1};
-%         supervar.runscript_params = [];        
-%         supervar.data = {};
-%         supervar.data_descript = '{region} / struct array of celloutputs';
-        
         % iterate over regions
         for reg = 1 %1:6
             
-            % load data
+            % load data if saved previously
 %             regionscript  % to obtain rawvar
             cd(datadir)
 %             filename = dir(sprintf('Super%s_raw_%s*',eventconsname,animal{1}(1:3)));  % if previously saved and want to load...
 %             load([datadir filename.name],rawvar)
 %             regionscript  % a script of "if" statements with color assignments, etc for various brain regions; see Kenny's
-            
-            % transfer run parameters over
-%             if reg ==1
-%                 supervar.runscript_params = f.runscript_params;
-%             end
             
             % find unique cells (day-tet-cell)
             detc = [];
@@ -302,11 +284,6 @@ mark_confirmed_sleep_ripples = 0;  % only use if "sleep" data structure was pass
 timecourse_colormap = 0;
 plot_variance = 0;
 
-% load sig modulated cell indices if previously saved
-% loaddir = sprintf('/opt/data40/mari/%s/ripplemoddata',anim);
-% [Dsigcells, Dcellindices] = find_sigripplemodcells(loaddir,anim,dayfilter,epochtype,'dca1ripplescons');
-% [Vsigcells, Vcellindices] = find_sigripplemodcells(loaddir,anim,dayfilter,epochtype,'vca1ripplescons');
-
 region = 'NAc';
 
 for c = 1:length(A)
@@ -314,7 +291,7 @@ for c = 1:length(A)
     
     % Create smoothed PSTH of mean firing rate
     smoothing_length = 10;   % std of gaussian (in ms) used to smooth rip psth
-    smoothing_width = round(smoothing_length*.001/nacf.runscript_params.binsize);   % smoothing width in number of bins
+    smoothing_width = round(smoothing_length*.001/f.runscript_params.binsize);   % smoothing width in number of bins
     kernel = gaussian(smoothing_width,smoothing_width*8);
     smoothedpsth = smoothvect(sum(full(data.psth),1)./(binsize*data.noevents),kernel);
     A(c).smoothedpsth = smoothedpsth;
@@ -454,22 +431,17 @@ for c = 1:length(A)
         set(title_handle,'Fontsize',18,'FontWeight','normal')
         set(gcf, 'renderer', 'zbuffer')
         if savefigs
-            figfilename = sprintf('%sripplespikerasters/%s/%sNAc_%d-%d-%d_%s.fig',datadir,epochtype,anim,A(c).dtc,eventconsname);
+            figfilename = sprintf('%sripplespikerasters/%s/%s_%d-%d-%d_%s.fig',datadir,epochtype,anim,A(c).dtc,eventconsname);
             saveas(h,figfilename)
-            %to save as eps if cell is significant, after running find_sigripplemodcells:
-            if ismember(A(c).dtc,Dcellindices,'rows') || ismember(A(c).dtc,Vcellindices,'rows') % save if sig mod either by D or V
-                epsfilename = sprintf('%sripplespikerasters/%s/%sNAc_%d-%d-%d_%s.eps',datadir,epochtype,anim,A(c).dtc,eventconsname);
-                print(epsfilename,'-depsc')
-            end
         end
         %         close(gcf)
         
-    end %end raster plot section for now, 10/3/15
+    end 
 end
 
-if saveA_tofile
-    % cd(sprintf('%s/ripplemoddata_0to200',datadir))
-    % save(sprintf('%srippletrigspiking_%d_%s_100spikes.mat',animal{1}(1:3),day,eventconsname),'A','-v7.3');
+if savedatastruct_tofile
+    cd(sprintf('%s/ripplemoddata_0to200',datadir))
+    save(sprintf('%srippletrigspiking_%d_%s_100spikes.mat',animal{1}(1:3),day,eventconsname),'A','-v7.3');
 end
 
 %%  Calculate significance of modulation
@@ -487,7 +459,7 @@ if calcsig
     ripplemod = struct;
     ripplemod.days = daylist;
     ripplemod.event = eventconsname;
-    ripplemod.celltype = naccellfilter;
+    ripplemod.celltype = cellfilter;
     ripplemod.epochtype = epochtype;
     
     % previously had an option to save this for each day, a la "eliripplemod04"
@@ -542,7 +514,7 @@ if calcsig
         
         % smoothing should be the same as the plotted real data
         smoothing_length = 10;   % std of gaussian (in ms) used to smooth rip psth
-        smoothing_width = round(smoothing_length*.001/nacf.runscript_params.binsize);   % smoothing width in number of bins
+        smoothing_width = round(smoothing_length*.001/f.runscript_params.binsize);   % smoothing width in number of bins
         kernel = gaussian(smoothing_width,smoothing_width*8);
         
         % circularly shuffle individual ripple-triggered spiketrains by r # of bins,
