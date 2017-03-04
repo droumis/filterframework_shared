@@ -2,6 +2,7 @@ function out = loadeegstruct(animaldir, animalprefix, datatype, days, epochs, te
 
 % out = loadeegstruct(animaldir, animalprefix, datatype, days, epochs, tetrodes)
 %
+%  updated feb 2017 to actually load multiple days/epochs/ntrodes - dr
 % Load the components of an eeg cell array of combines then into one
 % variable. 
 %	datatype is a string with the base name of the files (e.g. 'theta') 
@@ -24,17 +25,20 @@ end
 
 
 out = [];
-% create the list of data files 
-for d = days
-    for e = epochs
-	for t = tet
-	    fname = sprintf('%s/EEG/%s%s%02d-%d-%02d.mat', animaldir, ...
-	    		animalprefix, datatype, d, e, t);
+% create the list of data files
+for id = 1:length(days)
+    d = days(id);
+    for ie = 1:length(epochs)
+        e = epochs(ie);
+        for it = 1:length(tet)
+            t = tet(it);
+            fname = sprintf('%s/EEG/%s%s%02d-%d-%02d.mat', animaldir, ...
+                animalprefix, datatype, d, e, t);
             try
-		load(fname);
-		eval(['out = datavaradd(out,',datatype,');']);
-	    catch
-	    end
+                load(fname);
+                eval(['out = datavaradd(out,',datatype,');']);
+            catch
+            end
         end
     end
 end

@@ -1,7 +1,9 @@
 
-
+*gitignore*
 *~
 crap
 crap/*
 wiki
 wiki/*
+depricated
+depricated/*
