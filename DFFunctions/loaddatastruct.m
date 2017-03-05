@@ -8,6 +8,8 @@ function out = loaddatastruct(animaldir, animalprefix, datatype, days)
 % is omitted, all files are loaded.  Otherwise, only the files for the
 % specified days will be included.
 
+% instead of this function, use loadeegstruct to load eeg structures 
+
 if (nargin < 4)
     days = [];
 end
