@@ -3,7 +3,9 @@ function output = cellfetch(cellinput, field, varargin)
 % searchresults = cellfetch(input, field)
 
 %DR updated to add functionality of returning all the tags for that day/epoch/ntrode as a struct 
-%if you pass in the optional 'alltags' = 1; default is still 0.
+%if you pass in the optional 'alltags' = 1; default is still 0. You must
+%still pass in an empty string for the 'field' field.
+%e.g.: tetinfoAll = cellfetch(tetinfo, '', 'alltags', 1);
 
 % This function parces a nested cell variable 'input', and assumes nothing about
 % the structure of the internal cell tree. It returns a structure with the value of the
