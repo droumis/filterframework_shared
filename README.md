@@ -1,6 +1,6 @@
 **-------- flab analysis repo README----------------**
 
-*See repo Wiki for analysis-specific documentation*
+*See repo Wiki for a detailed overview of the filter framework structure and data formats, as well as analysis-specific documentation*
 
 **Branch management:**
 master <-- develop <-- <feature branch>
