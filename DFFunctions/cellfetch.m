@@ -25,9 +25,9 @@ end
 output.index = [];
 output.values = {};
 indexcount = 0;
-if ~exist('branchindex');
-    branchindex = [];
-end
+% if ~exist('branchindex');
+%     branchindex = [];
+% end
 
 if iscell(cellinput)
     for i = 1:length(cellinput)
@@ -53,7 +53,8 @@ if iscell(cellinput)
 %                 output.values{indexcount,1} = [];
 %             end
         elseif iscell(cellinput{i})
-            [branch] = cellfetch(cellinput{i}, field, 'branchindex', i);
+%             varargin = [varargin, {'branchindex'}, {i}];
+            [branch] = cellfetch(cellinput{i}, field, varargin{:});
             numentries = size(branch.index,1);
             branch.index = [repmat(i,[numentries,1]) branch.index];
             output.index(indexcount+1:indexcount+numentries,1:size(branch.index,2)) = branch.index;
