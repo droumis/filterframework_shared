@@ -27,7 +27,7 @@ function [out] = getconstimes(animaldir,animalprefix, epochs, eventconsname, tet
 % default values
 cellfilter = '';
 minenergy = 0;
-minthresh = 0;
+minthresh = [];
 exclusion_dur = 0;     % duration after ripple within which start of any subsequent ripple is eliminated
 exclusion_nevents = 0;    % number of tetrodes that must have ripple for exclusion to kick in
 exclusion2_eventconsname = '';
@@ -66,6 +66,9 @@ for option = optioninds
             coh_percentile = varargin{option+1};
             coh_pairnums = varargin{option+2};
     end
+end
+if isempty(minstdthresh)
+    error('must set min std threshold')
 end
 
 %check to see if a cell filter is specified
