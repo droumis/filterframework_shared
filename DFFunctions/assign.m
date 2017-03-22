@@ -11,9 +11,9 @@ function assign(varargin)
 %		assign(varargin{:});
 %	the variable z can be given a non-default value by calling the
 %	function like so: foo(x,y,'z',4);
-
-vars = {varargin{1:2:end}};
-vals = {varargin{2:2:end}};
+startcell = find(cell2mat(cellfun(@(x) ischar(x), varargin, 'UniformOutput', false)),1); %DR. look for first occurance of a string to start the assign in 
+vars = {varargin{startcell:2:end}};
+vals = {varargin{startcell+1:2:end}};
 
 % use length(vals) not length(vars) in case of odd number of arguments
 for i = 1:length(vals)

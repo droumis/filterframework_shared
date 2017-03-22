@@ -8,7 +8,7 @@ function [eegvar] = iseegvar(varname)
 %	'gamma'
 %	'ripple'
 switch (varname)
-case {'eeg', 'theta', 'gamma', 'ripple','eeggnd','thetagnd','gammagnd','ripplegnd'}
+case {'eeg', 'theta', 'gamma', 'ripple','eeggnd','thetagnd','gammagnd','ripplegnd', 'slowgamma', 'fastgamma', 'lowgamma', 'highgamma'}
     eegvar = 1;
 otherwise
     eegvar = 0;
