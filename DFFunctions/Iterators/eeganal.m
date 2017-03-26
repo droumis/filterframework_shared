@@ -3,14 +3,14 @@ function f = singleeeganal(f)
 % Iterator for a filter object.  Calls the function designated in
 % f().function.name, after loading the eeg variables designated as strings in
 % f().function.loadvariables{:}.  Also the function call appends any
-% options in the f().function.options{} cell array.  
-% 
-% Each function call is for one tetrode, and it is assumed that 
-% the function's first input is the index to the tetrode ([day epoch tetrode]). 
+% options in the f().function.options{} cell array.
+%
+% Each function call is for one tetrode, and it is assumed that
+% the function's first input is the index to the tetrode ([day epoch tetrode]).
 % The second input is a list of exclusion periods [starttime endtime].
 % The next inputs are the load variables.  Note that eeg load variables,
-% specified in iseegvar(), are loaded individually for each tetrode.  
-% The final inputs are the options. 
+% specified in iseegvar(), are loaded individually for each tetrode.
+% The final inputs are the options.
 % out = fname(index, excludeperiods, var1, var2, ..., option1, option2,...).
 %
 % The output of the call function can either be a 1 by N vector, or a structure.
@@ -28,6 +28,16 @@ for an = 1:length(f)
     end
     totaldays = unique(totalepochs(:,1)); %get all of the days across groups
     
+    %     %load all the variables that the function requires except the eeg
+%         loadstring = [];
+    %     for i = 1:length(f(an).function.loadvariables)
+    %         if ~(iseegvar(f(an).function.loadvariables{i}))
+    %             %         disp(f(an).function.loadvariables{i})
+    %             eval([f(an).function.loadvariables{i},' = loaddatastruct(animaldir, animalprefix, f(an).function.loadvariables{i}, totaldays);']);
+    %             loadstring = [loadstring, f(an).function.loadvariables{i},','];
+    %         end
+    %     end
+    
     %load all the variables that the function requires
     foptions = f(an).function.options;
     
@@ -35,17 +45,20 @@ for an = 1:length(f)
     for g = 1:length(f(an).epochs)
         
         for e = 1:size(f(an).epochs{g},1)
-
+            
             for c = 1:size(f(an).eegdata{g}{e},1)
                 tmpindex = [f(an).epochs{g}(e,:) f(an).eegdata{g}{e}(c,:)];
                 excludeperiods = f(an).excludetime{g}{e};
-		loadstring = [];
-		for i = 1:length(f(an).function.loadvariables)
-		    eval([f(an).function.loadvariables{i},' = loadeegstruct(animaldir, animalprefix, f(an).function.loadvariables{i}, tmpindex(1), tmpindex(2), tmpindex(3:end));']);
-		    loadstring = [loadstring, f(an).function.loadvariables{i},','];
-		end
+                loadstring = [];
+                for i = 1:length(f(an).function.loadvariables)
+                    if (iseegvar(f(an).function.loadvariables{i}))
+                        eval([f(an).function.loadvariables{i},' = loadeegstruct(animaldir, animalprefix, f(an).function.loadvariables{i}, tmpindex(1), tmpindex(2), tmpindex(3:end));']);
+                        loadstring = [loadstring, f(an).function.loadvariables{i},','];
+                    end
+                end
                 %run the designated function: fout = fname(tmpindex, var1, var2, ..., option1, option2, ...)
                 eval(['fout = ',f(an).function.name,'(tmpindex,excludeperiods,', loadstring, 'foptions{:});']);
+                
                 
                 %save the function output in the filter variable.  Allows numeric or struct outputs
                 if isstruct(fout)
@@ -70,7 +83,7 @@ for an = 1:length(f)
         end
     end
 end
-                        
-                
-            
-            
+
+
+
+
