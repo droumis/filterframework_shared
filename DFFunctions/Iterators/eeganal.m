@@ -22,22 +22,6 @@ for an = 1:length(f)
     %find all unique epochs to analyze for the current animal
     animaldir = f(an).animal{2};
     animalprefix = f(an).animal{3};
-    totalepochs = [];
-    for g = 1:length(f(an).epochs)
-        totalepochs = [totalepochs; f(an).epochs{g}];
-    end
-    totaldays = unique(totalepochs(:,1)); %get all of the days across groups
-    
-    %     %load all the variables that the function requires except the eeg
-%         loadstring = [];
-    %     for i = 1:length(f(an).function.loadvariables)
-    %         if ~(iseegvar(f(an).function.loadvariables{i}))
-    %             %         disp(f(an).function.loadvariables{i})
-    %             eval([f(an).function.loadvariables{i},' = loaddatastruct(animaldir, animalprefix, f(an).function.loadvariables{i}, totaldays);']);
-    %             loadstring = [loadstring, f(an).function.loadvariables{i},','];
-    %         end
-    %     end
-    
     %load all the variables that the function requires
     foptions = f(an).function.options;
     
