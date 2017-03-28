@@ -1,4 +1,4 @@
-function f = singleeeganal(f)
+function f = singleeeganal(f, varargin)
 % f = singleeeganal(f)
 % Iterator for a filter object.  Calls the function designated in
 % f().function.name, after loading the eeg variables designated as strings in
@@ -36,7 +36,7 @@ for iday = 1:lendays
         ep = eps(iep);
         lenitets = size(f.eegdata{iday}{iep},1);
         for itet = 1:lenitets
-            tet = f.eegdata{iday}{iep}(itet,:);
+            tet = f.eegdata{iday}{iep}(itet);
             tmpindex = [day ep tet];
             excludeperiods = f.excludetime{iday}{iep};
             loadstring = [];
