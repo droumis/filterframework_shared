@@ -28,8 +28,6 @@ animaldir = '/opt/data40/mari/Ger/'; %animalinfo{2};
 animalprefix = 'ger'  %animalinfo{3};
 day = 5;
 indexvec_flag = 1;        % leave this toggled -- directly identifies indices
-startval = 1; %ununsed (?)
-endval = 2500; %unused (?)
 linear_flag = 0;        % set to 1 if linear (not W) track -- then will plot trajectories instead of segments
 
 epoch_toplot = 3;
@@ -45,6 +43,8 @@ plot_xysegment = 1;
 
 % plot identified trajectories
 plot_xytraj = 1;
+plot_startstop = 1; %plot first and last index to approximate the beginning and end of the trajectory
+traj_to_plot = 1:30;
 
 % plot head dir on position
 plot_xyheaddir = 0;
@@ -103,7 +103,7 @@ if plot_lindistseg
         for segno = 1:11
             inds = [];
             inds = double(segmentnum == segno);
-            inds(find(inds==0))=nan;
+            inds(inds==0)=nan;
             if segno == 1
                 clr = 'k';
             elseif segno == 2
@@ -285,8 +285,8 @@ if plot_xytraj
     % -- for each trajectory numbers, plot in different colors - two
     % directions between the same pair of wells are plotted in the same color
     % -- to check for unassigned indices, set trajno to -1
-    for trajno = [1:36]
-%         clr = 'k'; % to check unassigned indices
+    for trajno = traj_to_plot
+        
         if trajno == 1 || trajno == 2
             clr = 'k';
         elseif trajno == 3 || trajno == 4
@@ -313,38 +313,35 @@ if plot_xytraj
             clr = [0.8 0.6 0.8]; %mauve
         elseif trajno == 25 || trajno == 26
             clr = [0.9 0.65 0.9]; %mauve
-            elseif trajno == 27 || trajno == 28
+        elseif trajno == 27 || trajno == 28
             clr = [0.6 0.6 0]; %olive
-            elseif trajno == 29 || trajno == 30
+        elseif trajno == 29 || trajno == 30
             clr = [0.3 0.3 0.1]; %mauve
         elseif trajno == 31 || trajno == 32 || trajno == 33 || trajno == 34 || trajno == 35 || trajno == 36 %all trackbacks
             clr = [0.3 0.3 0.3]; %dark grey
+        elseif trajno == -1
+            clr = 'k'; % to check unassigned indices
         end
         inds = (trajnum == trajno);
         % to plot time points per trajectory that occurred on segments not
         % technically included in the trajectory
-%         inds = ((trajnum == trajno) & (linpos{day}{epoch_toplot}.statematrix.nonstandardSegmentFlag>0))
+        %         inds = ((trajnum == trajno) & (linpos{day}{epoch_toplot}.statematrix.nonstandardSegmentFlag>0))
 %         
    % plot grey line for all positions
-    figure
-    plot(posdata(:,6),posdata(:,7),'linewidth',1.5,'Color',[.8 .8 .8]);
-    hold on
-    scatter(posdata(inds,6),posdata(inds,7),4,clr);
-            %plot(posdata(inds,6),posdata(inds,7),'-','linewidth',2,'color',clr);
+   figure
+   plot(posdata(:,6),posdata(:,7),'linewidth',1.5,'Color',[.8 .8 .8]);
+   hold on
+   scatter(posdata(inds,6),posdata(inds,7),4,clr);
+   %plot(posdata(inds,6),posdata(inds,7),'-','linewidth',2,'color',clr);
+   if plot_startstop
+       plot(posdata(find(inds,1),6),posdata(find(inds,1),7),'.','Color',[0 0.6 0],'MarkerSize',25) % green = start
+       plot(posdata(find(inds,1,'last'),6),posdata(find(inds,1,'last'),7),'.','Color',[0.6 0 0],'MarkerSize',25) % red = end
+   end
        title([animal(1:3) ' day ' num2str(day) ' epoch ' num2str(epoch_toplot) ' traj ' num2str(trajno)],'fontsize',16,'fontweight','bold');
         
     end
     
     
-%     % plot starttime to endtime trajectory
-%     if ~indexvec_flag
-%         startval = lookup(startval,posdata(:,1));
-%         endval = lookup(endval,posdata(:,1));
-%     end
-%     plot(posdata(startval:endval,6),posdata(startval:endval,7),'.','linewidth',6,'color','y');
-%     scatter(posdata(startval,6),posdata(startval,7),1000,'k','.');
-    
-    %title([animal(1:3) ' day ' num2str(day) ' epoch ' num2str(epoch_toplot) ' : ' num2str([startval endval])],'fontsize',16,'fontweight','bold');
     
 end
 

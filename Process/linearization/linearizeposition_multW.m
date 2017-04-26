@@ -340,7 +340,7 @@ if (whichTraj(1) == 0) %more than one starting well exists, so we need more comp
                 i = i+1;
             else %if current segment is not a member of the trajectory
                 % check if this is an excursion that still results in the completion of the trajectory by checking neighboring segments 
-                if ismember(segNonzero(i),segmentInfo.connectedSegments{segNonzero(i-1)})
+                if i>1 && ismember(segNonzero(i),segmentInfo.connectedSegments{segNonzero(i-1)})
                     currsegment = segNonzero(i);
                     new = segNonzero(i:end);
                     % find the next index that contains a segment included in the trajectory, and is still tagged as the same trajectory
@@ -365,7 +365,9 @@ if (whichTraj(1) == 0) %more than one starting well exists, so we need more comp
                         i = i+1; % continue without replacing values in whichTraj
                     end
                 % if the current segment is not even connected to the
-                % segments of this trajectory, skip the index
+                % segments of this trajectory, skip the index.
+                % NOTE: if there is maze exploration before the first well
+                % entry, those indices will be unassigned!!
                 else
                     badindex = [badindex; i];
                     i = i+1; % continue without replacing values in whichTraj
