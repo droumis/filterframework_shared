@@ -11,14 +11,13 @@
 % correct trajectory
 % startposind -- corresponds to the pos{}{} rows
 
-% these are then manually entered into manual_segment option of
-% kk_lineardayprocess -- downstream, kk_linearizeposition recognizes these
-% places to force the correct segment
-
-% how to use: use plot_lindistseg and plot_xysegment together
+% how to use to find segments to manually reassign: use plot_lindistseg and plot_xysegment together
 % the faulty areas will be extremely clear on plot_xysegment
 % find where these segments occur in the plot_lindistseg, then zoom in
 % manually to find the FIRST index (and a stretch afterwards) to change
+%   % these are then manually entered into manual_segment option of
+%   kk_lineardayprocess -- downstream, kk_linearizeposition recognizes these
+%   places to force the correct segment
 %
 % set segment and trajectory colors below
 
@@ -32,14 +31,11 @@ linear_flag = 0;        % set to 1 if linear (not W) track -- then will plot tra
 
 epoch_toplot = 3;
 
-% plot formats
+% plot linear distance from wells over time, color-coded by segment
 plot_lindistseg = 1;
 
 % plot positions of identified segments
 plot_xysegment = 1;
-% if plot_xysegment
-%     epoch_toplot = 5; %find(~cellfun('isempty',linpos{day}),1);
-% end
 
 % plot identified trajectories
 plot_xytraj = 1;
@@ -48,9 +44,6 @@ traj_to_plot = 1:30;
 
 % plot head dir on position
 plot_xyheaddir = 0;
-if plot_xyheaddir
-    epoch_toplot = 5;
-end
 
 
 %% Load pos and linpos.
@@ -323,6 +316,8 @@ if plot_xytraj
             clr = 'k'; % to check unassigned indices
         end
         inds = (trajnum == trajno);
+         % Only plot the trajectories that exist
+        if sum(inds)>0
         % to plot time points per trajectory that occurred on segments not
         % technically included in the trajectory
         %         inds = ((trajnum == trajno) & (linpos{day}{epoch_toplot}.statematrix.nonstandardSegmentFlag>0))
@@ -338,7 +333,7 @@ if plot_xytraj
        plot(posdata(find(inds,1,'last'),6),posdata(find(inds,1,'last'),7),'.','Color',[0.6 0 0],'MarkerSize',25) % red = end
    end
        title([animal(1:3) ' day ' num2str(day) ' epoch ' num2str(epoch_toplot) ' traj ' num2str(trajno)],'fontsize',16,'fontweight','bold');
-        
+        end
     end
     
     

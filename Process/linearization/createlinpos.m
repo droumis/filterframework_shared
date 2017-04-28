@@ -58,7 +58,7 @@ for j = 1:length(coord)
 end
 inbound = 0;
 lastvalid = -1;
-segdist = zeros(size(pos,1),1);
+segdist = ones(size(pos,1),1).*-1;
 for i = 1:size(pos,1)
     % project each position point onto the linear segments
     if (pos(i,2) == 0)
