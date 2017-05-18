@@ -1,4 +1,4 @@
-function f = excludecellsf(f, includecells)
+function f = excludecellsf(f, includecells, varargin)
 % only includes cells in includecells, can apply to single cells or cell
 % pairs
 

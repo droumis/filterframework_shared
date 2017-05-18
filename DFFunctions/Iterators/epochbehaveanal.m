@@ -1,4 +1,4 @@
-function f = epochbehaveanal(f)
+function f = epochbehaveanal(f, varargin)
 % f = epochbehaveanal(f)
 % Iterator for a filter object.  Calls the function designated in
 % f().function.name, after loading the variables designated as strings in

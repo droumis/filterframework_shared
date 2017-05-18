@@ -1,4 +1,4 @@
-function f = testexcludetimes(f, mintime)
+function f = testexcludetimes(f, mintime, varargin)
 %f = testexcludetimes(f)
 % removes epochs from the filter if entire epoch is excluded by parameters
 % in excludetimes

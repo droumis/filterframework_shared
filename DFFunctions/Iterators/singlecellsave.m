@@ -1,4 +1,4 @@
-function f = singlecellsave(f)
+function f = singlecellsave(f, varargin)
 % f = singlecellsave(f)
 % Iterator for a filter object.  Calls the function designated in
 % f().function.name, after loading the variable designated as strings in

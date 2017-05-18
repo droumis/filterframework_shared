@@ -5,11 +5,11 @@
 
 % clear all
 close all
-runFilterFramework = 0;
-saveFilterOutput = runFilterFramework;
-loadFilterOutput = 1;
-EpochMean = 1;resaveFilterOutput = 1;
-plotSpec_EpochMean = 1;
+runFilterFramework = 1;
+saveFilterOutput = 0;%runFilterFramework;
+loadFilterOutput = 0;
+EpochMean = 0;resaveFilterOutput = 0;
+plotSpec_EpochMean = 0;
 plotSpec_allEpochs = 0;
 outputDirectory = '/typhoon/droumis/analysis';
 %% ---------------- plotting params --------------------------
@@ -25,7 +25,7 @@ epochEnvironment = 'openfield'; %wtrack, wtrackrotated, openfield, sleep
 tetArea = 'mec'; %ca1, mec, por
 
 consensus_numtets = 1;   % minimum # of tets for consensus event detection
-minthresh = 2;        % STD. how big your ripples are
+minstdthresh = 2;        % STD. how big your ripples are
 exclusion_dur = 0.5;  % seconds within which consecutive events are eliminated / ignored
 minvelocity = 0;
 maxvelocity = 4;
@@ -44,7 +44,7 @@ if runFilterFramework == 1;
     % timefilter{1} = {'get2dstate','($velocity<4)'};
     % timefilter{2} = {'kk_getriptimes','($nripples>=1)',[],'tetfilter',tetfilter,'minthresh',5};
     timefilter{1} = {'getconstimes', '($cons == 1)',[eventarea,eventtype],1,'consensus_numtets',consensus_numtets,...
-        'minthresh',minthresh,'exclusion_dur',exclusion_dur,'minvelocity',minvelocity,'maxvelocity',maxvelocity};
+        'minstdthresh',minstdthresh,'exclusion_dur',exclusion_dur,'minvelocity',minvelocity,'maxvelocity',maxvelocity};
     %----------F = createfilter('animal', animals, 'days', dayfilter,'epochs', epochfilter, 'excludetime', timefilter, 'eegtetrodes',tetfilter,'iterator', iterator);--------
     F = createfilter('animal', animals, 'days', days,'epochs', epochfilter, 'excludetime', timefilter, 'eegtetrodes',tetfilter,'iterator', iterator);
     %----------f = setfilteriterator(f, funcname, loadvariabl   es, options)--------

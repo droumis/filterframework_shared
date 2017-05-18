@@ -1,4 +1,4 @@
-function f = singleepochanal(f)
+function f = singleepochanal(f,varargin)
 % f = singleepochanal(f)
 % Iterator for a filter object.  Calls the function designated in
 % f().function.name, after loading the variables designated as strings in
