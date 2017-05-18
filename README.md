@@ -15,7 +15,6 @@ master <-- develop <-- <feature branch>
  **DO NOT** put anything into the shared develop branch with initials appended
 
 * The develop branch is for basic, lab-shareable code
-* Create a user-specific directory for yourself if you wish to put your kk_sj_sk_Kodez_useme_old_v4.m files
 
  For substantial modifications to develop, create a temporary working branch (ex: linearization-dev). 
 

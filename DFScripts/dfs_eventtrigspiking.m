@@ -13,11 +13,9 @@ dayfilter = 5;              % enter days to filter here
 postprocessing = 1;             
 calcsig = 1;                % calculate significance of each cell's SWR-modulation
 
-plot_singlerasters = 1; 
-if plot_singlerasters  
-       savefigs = 0;
-       savedatastruct_tofile = 0;
-end
+plot_singlerasters = 1;     % plot individual cell rasters and psths
+savefigs = 0;               % save each figure
+savedatastruct_tofile = 0;  % save post-processed data to file
 
 %%% SPARSIFY %%%
 % Option to randomly delete a certain proportion of spikes for each cell
@@ -434,7 +432,7 @@ for c = 1:length(A)
             figfilename = sprintf('%sripplespikerasters/%s/%s_%d-%d-%d_%s.fig',datadir,epochtype,anim,A(c).dtc,eventconsname);
             saveas(h,figfilename)
         end
-        %         close(gcf)
+                close(gcf)
         
     end 
 end
