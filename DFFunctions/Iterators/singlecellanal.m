@@ -50,7 +50,7 @@ for an = 1:length(f)
                 day = tmpindex(1);
                 ep = tmpindex(2);
                 tet = tmpindex(3);
-                
+                foptions = [foptions {'an', an}]; %add the animal index to the varargins
                 if outputDayEpTetCells
                     eval(['f.output{' num2str(day) '}{' num2str(ep) '}{' num2str(tet) '} = ',f.function.name,'(tmpindex,excludeperiods,', loadstring, 'foptions{:});']);
                 else

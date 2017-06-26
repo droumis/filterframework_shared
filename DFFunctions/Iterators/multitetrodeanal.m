@@ -46,7 +46,7 @@ for an = 1:length(f)
         for i = 1:length(f(an).function.loadvariables)
             if (iseegvar(f(an).function.loadvariables{i}))
                 ntrodes = f(an).eegdata{1}{idayep};
-                disp(f(an).function.loadvariables{i})
+%                 disp(f(an).function.loadvariables{i})
                 eval([f(an).function.loadvariables{i},' = loadeegstruct(animaldir, animalprefix, f(an).function.loadvariables{i}, day, epoch, ntrodes);']);
             end
         end
