@@ -13,7 +13,7 @@ a = zeros(2 * nbins + 1, 2);
 s = spikestruct.data(:,1) * 1e3; % convert to ms
 nspikes = length(s);
 
-if (nspikes < 10) 
+if (nspikes < 100) 
 	% too few spikes for a decent acorr
 	ac = [];
 	return
