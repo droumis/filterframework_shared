@@ -60,7 +60,9 @@ for an = 1:length(f)
         
         % run the specified filter function on this set of animal/epoch/ntrodes
         eval(['fout = ',f(an).function.name,'(indices,excludeperiods,' loadstring, 'foptions{:});']);
-        
+        if isempty(fout)
+            continue
+        end
         %save the function output in the filter variable.  Allows numeric or struct outputs
         if isstruct(fout)
             f(an).output{day}(epoch) = fout;
