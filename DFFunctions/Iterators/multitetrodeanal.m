@@ -57,10 +57,13 @@ for an = 1:length(f)
         numntrodes = size(ntrodes,1);
         indices = [repmat(f(an).epochs{1}(idayep,:),[numntrodes 1]) ntrodes];
         excludeperiods = f(an).excludetime{1}{idayep};
-        
+        if isempty(indices)
+            disp(sprintf('no data for %s Day%d ep%d.. skipping', animalprefix, day, epoch))
+            continue
+        end
         % run the specified filter function on this set of animal/epoch/ntrodes
         eval(['fout = ',f(an).function.name,'(indices,excludeperiods,' loadstring, 'foptions{:});']);
-        if isempty(fout)
+        if isempty(fout.data)
             continue
         end
         %save the function output in the filter variable.  Allows numeric or struct outputs
