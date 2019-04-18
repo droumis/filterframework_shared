@@ -34,7 +34,9 @@ for i = 1:size(epochs,1)
         elseif strcmp(pos{epochs(i,1)}{epochs(i,2)}.fields,'time x y dir vel smooth-x smooth-y smooth-v smooth-dir')
             tmpvelocity = pos{epochs(i,1)}{epochs(i,2)}.data(:,8);  % kk 5.29.13
         elseif strcmp(pos{epochs(i,1)}{epochs(i,2)}.fields,'time x y dir vel smooth-x smooth-y smooth-dir smooth-v')
-            tmpvelocity = pos{epochs(i,1)}{epochs(i,2)}.data(:,9);  % kk 5.29.13            
+            tmpvelocity = pos{epochs(i,1)}{epochs(i,2)}.data(:,9);  % kk 5.29.13         
+        elseif strcmp(pos{epochs(i,1)}{epochs(i,2)}.fields,'time x-interp y-interp dir-interp vel-gauss x-loess y-loess dir-loess vel-loess')
+            tmpvelocity = pos{epochs(i,1)}{epochs(i,2)}.data(:,9);  % dr 4.10.19         
         else
             disp('unknown pos format')
         end

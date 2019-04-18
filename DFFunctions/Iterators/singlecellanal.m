@@ -39,46 +39,46 @@ for an = 1:length(f)
     foptions = f(an).function.options;
     
     %iterate through the epochs within each data group
+    fprintf(':::::::: single cell iterator :::::::: \n');
     for g = 1:length(f(an).epochs)
-        
-        for e = 1:size(f(an).epochs{g},1)
-            
-            for c = 1:size(f(an).data{g}{e},1)
-                tmpindex = [f(an).epochs{g}(e,:) f(an).data{g}{e}(c,:)];
-                excludeperiods = f(an).excludetime{g}{e};
-                
-                day = tmpindex(1);
-                ep = tmpindex(2);
-                tet = tmpindex(3);
-                foptions = [foptions {'an', an}]; %add the animal index to the varargins
-                if outputDayEpTetCells
-                    eval(['f.output{' num2str(day) '}{' num2str(ep) '}{' num2str(tet) '} = ',f.function.name,'(tmpindex,excludeperiods,', loadstring, 'foptions{:});']);
+    for e = 1:size(f(an).epochs{g},1)
+    for c = 1:size(f(an).data{g}{e},1)
+        tmpindex = [f(an).epochs{g}(e,:) f(an).data{g}{e}(c,:)];
+        excludeperiods = f(an).excludetime{g}{e};
+
+        day = tmpindex(1);
+        ep = tmpindex(2);
+        tet = tmpindex(3);
+        foptions = [foptions {'an', an}]; %add the animal index to the varargins
+        if outputDayEpTetCells
+            eval(['f.output{' num2str(day) '}{' num2str(ep) '}{' num2str(tet) '} = ',f.function.name,'(tmpindex,excludeperiods,', loadstring, 'foptions{:});']);
+        else
+            %run the designated function: fout = fname(tmpindex, var1, var2, ..., option1, option2, ...)
+            fprintf(sprintf('%s %d %d %d :: %s \n', f(an).animal{1}, day, ...
+                ep, tet, f(an).function.name));
+            eval(['fout = ',f(an).function.name,'(tmpindex,excludeperiods,', loadstring, 'foptions{:});']);
+            %save the function output in the filter variable.  Allows numeric or struct outputs
+            if isstruct(fout)
+                if (isempty(f(an).output) | (length(f(an).output) < g))
+                    f(an).output{g}(1) = fout;
                 else
-                    %run the designated function: fout = fname(tmpindex, var1, var2, ..., option1, option2, ...)
-                    eval(['fout = ',f(an).function.name,'(tmpindex,excludeperiods,', loadstring, 'foptions{:});']);
-                    
-                    %save the function output in the filter variable.  Allows numeric or struct outputs
-                    if isstruct(fout)
-                        if (isempty(f(an).output) | (length(f(an).output) < g))
-                            f(an).output{g}(1) = fout;
-                        else
-                            f(an).output{g}(end+1) = fout;
-                        end
-                    elseif isnumeric(fout)
-                        if ((isempty(f(an).output)) | (length(f(an).output) < g))
-                            f(an).output{g} = [];
-                        end
-                        if (size(fout,1) >= 1) %edited by AS changed from (size(fout,1) == 1)
-                            f(an).output{g} = stack(f(an).output{g}, fout);
-                        else
-                            error(['In calling ', f(an).function.name, ': Numeric function outputs must be 1 by N.  Use a structure output for more complicated outputs']);
-                        end
-                    else
-                        error(['In calling ', f(an).function.name, ': Function output must be either numeric or a structure']);
-                    end
+                    f(an).output{g}(end+1) = fout;
                 end
+            elseif isnumeric(fout)
+                if ((isempty(f(an).output)) | (length(f(an).output) < g))
+                    f(an).output{g} = [];
+                end
+                if (size(fout,1) >= 1) %edited by AS changed from (size(fout,1) == 1)
+                    f(an).output{g} = stack(f(an).output{g}, fout);
+                else
+                    error(['In calling ', f(an).function.name, ': Numeric function outputs must be 1 by N.  Use a structure output for more complicated outputs']);
+                end
+            else
+                error(['In calling ', f(an).function.name, ': Function output must be either numeric or a structure']);
             end
         end
+    end
+    end
     end
 end
 
