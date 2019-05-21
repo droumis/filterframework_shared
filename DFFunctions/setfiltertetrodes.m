@@ -14,7 +14,7 @@ for an = 1:length(f)
     end
     datadir = f(an).animal{2};
     animalprefix = f(an).animal{3};
-    tetrodeinfo = loaddatastruct(datadir,animalprefix,'tetrodeinfo');
+    tetrodeinfo = loaddatastruct(datadir,animalprefix,'tetinfo');
 
     for i = 1:length(f(an).epochs)
         if isempty(f(an).epochs{i})
