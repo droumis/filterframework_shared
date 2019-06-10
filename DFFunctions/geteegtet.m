@@ -67,7 +67,8 @@ end
 if (~isempty(tetfilter))
     % this will cause us to ignore tetlist
     tetinfo = loaddatastruct(adir, aprefix, 'tetinfo');
-    tetlist = evaluatefilter(tetinfo{ind(1)}, tetfilter);
+    % Shantanu - CHange. This is wrong. Have to pass day and epoch
+    tetlist = evaluatefilter(tetinfo{ind(1)}{ind(2)}, tetfilter);
 else
     % set the tetlist to empty to load all tetrodes
     tetlist = [];
@@ -75,14 +76,16 @@ end
 
 
 % calculate the specified measure to determine which channel to use
-eegvar = zeros(size(tetlist));
+eegvar = zeros(length(tetlist),1);
 if (maxvar)
     for i = 1:length(tetlist)
-	eeg = loadeegstruct(adir, aprefix, datatype, ind(1), ind(2),tetlist(i));
-	eegvar(i) = var(double(eeg{ind(1)}{ind(2)}{tetlist(i)}.data(:,1)));
+	eeg = loadeegstruct(adir, aprefix, datatype, ind(1), ind(2),tetlist(i,2));
+	eegvar(i) = var(double(eeg{ind(1)}{ind(2)}{tetlist(i,2)}.data(:,1)));
     end
     [m, eind] = max(eegvar);
-    eegtet = tetlist(eind);
+    eegtet = tetlist(eind,2);
     return;
+else
+    eegtet = tetlist;
 end
 

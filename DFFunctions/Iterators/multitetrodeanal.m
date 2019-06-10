@@ -58,7 +58,7 @@ for an = 1:length(f)
         indices = [repmat(f(an).epochs{1}(idayep,:),[numntrodes 1]) ntrodes];
         excludeperiods = f(an).excludetime{1}{idayep};
         if isempty(indices)
-            disp(sprintf('no data for %s Day%d ep%d.. skipping', animalprefix, day, epoch))
+            fprintf(sprintf('no data for %s Day%d ep%d.. skipping \n', animalprefix, day, epoch));
             continue
         end
         % run the specified filter function on this set of animal/epoch/ntrodes
@@ -69,11 +69,12 @@ for an = 1:length(f)
         %save the function output in the filter variable.  Allows numeric or struct outputs
         if isstruct(fout)
             f(an).output{day}(epoch) = fout;
-            %             elseif isnumeric(fout)
-            %                 if (length(f(an).output) < day)
-            %                     f(an).output{day} = [];
-            %                 end
-            %                 f(an).output{day} = stack(f(an).output{day}, fout);
+            
+%             elseif isnumeric(fout)
+%                 if (length(f(an).output) < day)
+%                     f(an).output{day} = [];
+%                 end
+%                 f(an).output{day} = stack(f(an).output{day}, fout);
         else
             error(['In calling ', f(an).function.name, ': Function output must be either numeric or a structure']);
         end

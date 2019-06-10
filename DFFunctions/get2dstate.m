@@ -1,4 +1,4 @@
-function out = kk_get2dstate(animaldir,animalprefix,epochs,varargin)
+function out = get2dstate(animaldir,animalprefix,epochs,varargin)
 % out = get2dstate(animaldir,animalprefix,epochs)
 % Produces a cell structure with the fields:
 % time, headdir, velocity
